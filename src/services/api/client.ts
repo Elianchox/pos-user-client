@@ -12,7 +12,7 @@ export class ApiError extends Error {
 }
 
 type RequestConfig = Omit<RequestInit, 'body'> & {
-  body?: Record<string, unknown> | null
+  body?: unknown
 }
 
 export async function apiFetch<T>(

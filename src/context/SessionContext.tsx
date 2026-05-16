@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { getToken, setToken, clearAll } from '@/services/session'
+import { getToken, setToken, clearAll, setTableId, getTableId } from '@/services/session'
 
 interface SessionContextType {
   token: string | null
@@ -18,8 +18,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([getToken()]).then(([t]) => {
+    Promise.all([getToken(), getTableId()]).then(([t, tid]) => {
       setTokenState(t)
+      setTableIdState(tid)
       setIsLoading(false)
     })
   }, [])
@@ -32,10 +33,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const removeToken = useCallback(async () => {
     await clearAll()
     setTokenState(null)
+    setTableIdState(null)
+  }, [])
+
+  const saveTableId = useCallback(async (id: string) => {
+    await setTableId(id)
+    setTableIdState(id)
   }, [])
 
   return (
-    <SessionContext.Provider value={{ token, tableId, isLoading, saveToken, removeToken, saveTableId: setTableIdState }}>
+    <SessionContext.Provider value={{ token, tableId, isLoading, saveToken, removeToken, saveTableId }}>
       {children}
     </SessionContext.Provider>
   )
