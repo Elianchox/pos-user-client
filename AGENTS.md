@@ -1,46 +1,57 @@
-# Expo HAS CHANGED
+# POS User Client
 
-Read the exact versioned docs at https://docs.expo.dev/versions/v55.0.0/ before writing any code.
+Expo 55, React Native 0.83, expo-router, TypeScript.
 
-## Project structure
+## Key facts
 
-Architecture: **horizontal by type**. Files grouped by role, not feature.
+- **Entrypoint**: `expo-router/entry` (not `App.tsx`). Routes live in `src/app/`.
+- **No test runner** installed. There is no `npm test`.
+- **No typecheck script**. `tsc` is not in `package.json`. TypeScript errors surface in-editor only.
+- **Single lint command**: `npm run lint` (ESLint, flat config at `eslint.config.js`).
+- `app.json` enables `reactCompiler` and `typedRoutes` experiments.
+
+## Architecture
+
+Horizontal by type. Route files in `app/` import and render from `screens/`.
 
 ```
 src/
-├── app/          expo-router routes (thin wrappers only)
-├── screens/      page-level components ← business logic lives here
-├── components/   reusable UI components
-├── hooks/        custom React hooks
-├── services/     API calls, business logic layer
-├── types/        TypeScript types and interfaces
+├── app/          expo-router routes (thin wrappers)
+├── screens/      business logic & page layout
+├── components/   reusable UI
+├── hooks/        custom hooks
+├── services/     API / business logic
+├── types/        TS types & interfaces
 ├── constants/    app-wide constants
-├── utils/        pure helper functions
+├── utils/        pure helpers
 └── context/      React context providers
 ```
 
-Route files in `app/` must be thin — import and render from `screens/`.
+Path aliases: `@/` → `src/`, `@/assets/` → `assets/` (set in `tsconfig.json`).
 
-## Paths
+## Known quirks
 
-- `@/` → `./src/*`
-- `@/assets/*` → `./assets/*`
+- `reset-project` script in `package.json` is stale (scripts/ dir removed). No need to run it.
+- Splash screen plugin only has Android config. iOS uses the Expo icon at `assets/expo.icon/`.
+- `app.json` → `scheme: "posuserclient"`. Used for deep linking.
 
 ## Commands
 
 | Action | Command |
 |--------|---------|
-| Start dev server | `npx expo start` |
+| Dev server | `npx expo start` (or `npm start`) |
+| Android | `npm run android` |
+| iOS | `npm run ios` |
+| Web | `npm run web` |
 | Lint | `npm run lint` |
 
-## Routing
+## Expo 55
 
-- File-based routing via expo-router
-- `app/_layout.tsx` sets the root Stack navigator
-- See https://docs.expo.dev/router/introduction
+- Applies to all codegen, plugin, and API decisions.
+- Docs: https://docs.expo.dev/versions/v55.0.0/
+- Do NOT use unversioned docs.
 
-## Conventions
+## Constraints
 
-- Avoid comments in components unless necessary
-- Mimic existing code style in the file being modified
-- Do NOT create `.md` documentation files unless explicitly requested
+- Do NOT create `.md` files unless asked.
+- `CLAUDE.md` delegates to this file via `@AGENTS.md`.
