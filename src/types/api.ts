@@ -42,7 +42,7 @@ export interface OrderItem {
 
 export interface OrderDetailResponse {
   success: boolean
-  data: { items: OrderItem[] }
+  data: { orderId?: string; items: OrderItem[] }
 }
 
 export interface OrderItemStatus {
