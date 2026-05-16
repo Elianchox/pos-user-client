@@ -6,48 +6,38 @@ Expo 55, React Native 0.83, expo-router, TypeScript.
 
 - **Entrypoint**: `expo-router/entry` (not `App.tsx`). Routes live in `src/app/`.
 - **No test runner** installed. There is no `npm test`.
-- **No typecheck script**. `tsc` is not in `package.json`. TypeScript errors surface in-editor only.
+- **No typecheck script**. TypeScript errors surface in-editor only.
 - **Single lint command**: `npm run lint` (ESLint, flat config at `eslint.config.js`).
 - `app.json` enables `reactCompiler` and `typedRoutes` experiments.
 
-## Architecture
+## Styling
 
-Horizontal by type. Route files in `app/` import and render from `screens/`.
+NativeWind v4 + TailwindCSS v4. Use `className` strings, not `StyleSheet.create`.
+Theme is defined via CSS custom properties in `src/global.css` with a `.dark` variant.
+Color tokens are accessed as Tailwind classes: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, etc.
 
-```
-src/
-├── app/          expo-router routes (thin wrappers)
-├── screens/      business logic & page layout
-├── components/   reusable UI
-├── hooks/        custom hooks
-├── services/     API / business logic
-├── types/        TS types & interfaces
-├── constants/    app-wide constants
-├── utils/        pure helpers
-└── context/      React context providers
-```
+## Data fetching
 
-Path aliases: `@/` → `src/`, `@/assets/` → `assets/` (set in `tsconfig.json`).
+`@tanstack/react-query` v5. Hooks in `src/hooks/api/` wrap `useQuery`/`useMutation`.
+API layer pattern: `constants/api.ts` (URLs) → `types/api.ts` (types) → `services/api/` (fetch via `apiFetch` with auto auth header) → `hooks/api/` (React Query wrappers).
 
-## Known quirks
+Real-time order updates use SSE via `@microsoft/fetch-event-source` (`src/services/sse/client.ts`).
 
-- `reset-project` script in `package.json` is stale (scripts/ dir removed). No need to run it.
-- Splash screen plugin only has Android config. iOS uses the Expo icon at `assets/expo.icon/`.
-- `app.json` → `scheme: "posuserclient"`. Used for deep linking.
+## State & persistence
 
-## Commands
+- **Session**: AsyncStorage stores `mobile_session_token` and `mobile_table_id`.
+  `SessionContext` exposes `useSession()` in `src/context/SessionContext.tsx`.
+- **Theme**: `ThemeContext` exposes `useTheme()` in `src/context/ThemeContext.tsx`.
+- Both providers are wired in `src/app/_layout.tsx` along with `QueryClientProvider`.
 
-| Action | Command |
-|--------|---------|
-| Dev server | `npx expo start` (or `npm start`) |
-| Android | `npm run android` |
-| iOS | `npm run ios` |
-| Web | `npm run web` |
-| Lint | `npm run lint` |
+## Environment
+
+- `EXPO_PUBLIC_API_URL` is the API base URL (Expo `EXPO_PUBLIC_` prefix).
+- Define in `.env` file (gitignored).
+- Default: `https://pos.eliancho.dev/api/mobile`
 
 ## Expo 55
 
-- Applies to all codegen, plugin, and API decisions.
 - Docs: https://docs.expo.dev/versions/v55.0.0/
 - Do NOT use unversioned docs.
 
