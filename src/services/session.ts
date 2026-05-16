@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const TOKEN_KEY = 'mobile_session_token'
 const TABLE_ID_KEY = 'mobile_table_id'
+const CUSTOMER_NAME_KEY = 'mobile_customer_name'
 
 export async function getToken(): Promise<string | null> {
   return AsyncStorage.getItem(TOKEN_KEY)
@@ -27,6 +28,14 @@ export async function clearTableId(): Promise<void> {
   await AsyncStorage.removeItem(TABLE_ID_KEY)
 }
 
+export async function getCustomerName(): Promise<string | null> {
+  return AsyncStorage.getItem(CUSTOMER_NAME_KEY)
+}
+
+export async function setCustomerName(name: string): Promise<void> {
+  await AsyncStorage.setItem(CUSTOMER_NAME_KEY, name)
+}
+
 export async function clearAll(): Promise<void> {
-  await AsyncStorage.multiRemove([TOKEN_KEY, TABLE_ID_KEY])
+  await AsyncStorage.multiRemove([TOKEN_KEY, TABLE_ID_KEY, CUSTOMER_NAME_KEY])
 }

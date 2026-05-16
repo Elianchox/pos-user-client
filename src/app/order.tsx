@@ -1,16 +1,17 @@
-import { useEffect, useMemo } from 'react'
-import { ScrollView, View } from 'react-native'
-import { useRouter } from 'expo-router'
+import { OrderHeader } from '@/components/order/OrderHeader'
+import { OrderItemGroup } from '@/components/order/OrderItemGroup'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { ErrorState } from '@/components/ui/ErrorState'
+import { LoadingState } from '@/components/ui/LoadingState'
+import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
 import { useOrderStream } from '@/hooks/api/useOrderStream'
 import { useTableStatus } from '@/hooks/api/useTableStatus'
-import { useSession } from '@/context/SessionContext'
-import { OrderHeader } from '@/components/order/OrderHeader'
-import { OrderItemGroup } from '@/components/order/OrderItemGroup'
-import { LoadingState } from '@/components/ui/LoadingState'
-import { ErrorState } from '@/components/ui/ErrorState'
-import { EmptyState } from '@/components/ui/EmptyState'
 import type { OrderItem } from '@/types/api'
+import { useRouter } from 'expo-router'
+import { useEffect, useMemo } from 'react'
+import { ScrollView, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface GroupedItem {
   productId: string
@@ -60,9 +61,9 @@ export default function OrderScreen() {
 
   useEffect(() => {
     if (!tableId) {
-      router.replace('/')
+      router.replace('/thank-you')
     }
-  }, [tableId, router])
+  }, [tableId, router, tableData?.data.status, removeToken])
 
   useEffect(() => {
     if (stream.orderClosed || stream.sessionEnded) {
@@ -86,30 +87,32 @@ export default function OrderScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background">
-      <OrderHeader
-        tableName={tableData?.data?.name ?? `Mesa ${tableId ?? ''}`}
-        totalAmount={totalAmount}
-        isConnected={stream.isConnected}
-      />
+    <SafeAreaView className="flex-1 bg-background">
+      <View className='h-full'>
+        <OrderHeader
+          tableName={tableData?.data?.name ?? `Mesa ${tableId ?? ''}`}
+          totalAmount={totalAmount}
+          isConnected={stream.isConnected}
+        />
 
-      <ScrollView className="flex-1 px-4 pt-4" contentContainerStyle={{ paddingBottom: 24 }}>
-        {groups.length === 0 ? (
-          <EmptyState message="Aún no hay productos en tu orden" />
-        ) : (
-          groups.map((group) => (
-            <OrderItemGroup
-              key={group.productId}
-              productId={group.productId}
-              productName={group.productName}
-              imageUrl={group.imageUrl}
-              price={group.price}
-              count={group.count}
-              items={group.items}
-            />
-          ))
-        )}
-      </ScrollView>
-    </View>
+        <ScrollView className="flex-1 px-4 pt-4" contentContainerStyle={{ paddingBottom: 24 }}>
+          {groups.length === 0 ? (
+            <EmptyState message="Aún no hay productos en tu orden" />
+          ) : (
+            groups.map((group) => (
+              <OrderItemGroup
+                key={group.productId}
+                productId={group.productId}
+                productName={group.productName}
+                imageUrl={group.imageUrl}
+                price={group.price}
+                count={group.count}
+                items={group.items}
+              />
+            ))
+          )}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   )
 }

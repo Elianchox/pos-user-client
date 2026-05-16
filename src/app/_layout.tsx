@@ -1,10 +1,10 @@
 import '../global.css'
 
-import { Stack } from 'expo-router'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SessionProvider } from '@/context/SessionContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { useDeepLink } from '@/hooks/useDeepLink'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Stack } from 'expo-router'
 
 const queryClient = new QueryClient()
 

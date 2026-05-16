@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { subscribeOrderStream } from '@/services/sse/client'
-import type { OrderItem, OrderDetailResponse } from '@/types/api'
+import type { OrderDetailResponse, OrderItem } from '@/types/api'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 
 export interface OrderStreamState {
   isConnected: boolean
@@ -30,6 +30,9 @@ export function useOrderStream(orderId: string) {
         await subscribeOrderStream(orderId, {
           signal: controller.signal,
           onEvent: (event) => {
+          console.log('========================================>');
+          console.log(event);
+          console.log('========================================>');
             if (!isActive) return
             setState((prev) => {
               const base = { ...prev, isConnected: true }
