@@ -45,9 +45,8 @@ export default function OrderScreen() {
   const { tableId, removeToken } = useSession()
   const { data: orderData, isLoading: orderLoading, error: orderError, refetch } = useOrderDetail()
   const { data: tableData, isLoading: tableLoading } = useTableStatus(tableId ?? '')
-  const orderId = orderData?.data?.order?.orderId ?? ''
 
-  const stream = useOrderStream(orderId)
+  const stream = useOrderStream()
 
   const groups = useMemo(() => {
     const items = orderData?.data?.order?.items ?? []
