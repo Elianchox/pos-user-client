@@ -6,5 +6,5 @@ export const ENDPOINTS = {
   tableStatus: (id: string) => `/tables/${id}/status`,
   orderDetail: '/orders/order-detail',
   orderItemStatuses: '/orders/order-item-statuses',
-  orderStream: (id: string) => `/orders/${id}/stream`,
+  orderStream: '/stream',
 } as const
