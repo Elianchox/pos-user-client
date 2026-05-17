@@ -1,10 +1,9 @@
-import { API_BASE_URL } from '@/constants/api'
+import { API_BASE_URL, ENDPOINTS } from '@/constants/api'
 import { getToken } from '@/services/session'
 import { STEAM_EVENT_TYPE_LIST, type OrderStreamEvent } from '@/types/api'
 import EventSource from 'react-native-sse'
 
 export async function subscribeOrderStream(
-  orderId: string,
   {
     onEvent,
     onError,
@@ -17,7 +16,7 @@ export async function subscribeOrderStream(
     signal: AbortSignal
   },
 ) {
-  const url = `${API_BASE_URL}/orders/${orderId}/stream`
+  const url = `${API_BASE_URL}${ENDPOINTS.orderStream}`
   const token = await getToken()
 
   const headers: Record<string, string> = {
