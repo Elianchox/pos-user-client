@@ -1,5 +1,5 @@
 const DEEPLINK_PATH = '/deeplink/table/'
-const ALLOWED_HOSTS = ['pos.eliancho.dev']
+const ALLOWED_HOSTS = ['pos.eliancho.dev', '172.20.10.4:3000']
 
 export interface ParsedQrUrl {
   tableId: string

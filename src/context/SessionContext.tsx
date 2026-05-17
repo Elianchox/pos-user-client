@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { getToken, setToken, clearAll, setTableId, getTableId, getCustomerName, setCustomerName as persistCustomerName } from '@/services/session'
+import { clearAll, getCustomerName, getTableId, getToken, setCustomerName as persistCustomerName, setTableId, setToken } from '@/services/session'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 interface SessionContextType {
   token: string | null
@@ -38,7 +38,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     await clearAll()
     setTokenState(null)
     setTableIdState(null)
-    setCustomerNameState(null)
   }, [])
 
   const saveTableId = useCallback(async (id: string) => {

@@ -45,19 +45,28 @@ export default function OrderScreen() {
   const { tableId, removeToken } = useSession()
   const { data: orderData, isLoading: orderLoading, error: orderError, refetch } = useOrderDetail()
   const { data: tableData } = useTableStatus(tableId ?? '')
-  const orderId = orderData?.data?.orderId ?? ''
+  const orderId = orderData?.data?.order?.orderId ?? ''
+
   const stream = useOrderStream(orderId)
 
   const groups = useMemo(() => {
-    const items = orderData?.data?.items ?? []
+    const items = orderData?.data?.order?.items ?? []
     return groupItems(items)
   }, [orderData])
 
   const totalAmount = useMemo(() => {
-    const items = orderData?.data?.items ?? []
+    const items = orderData?.data?.order?.items ?? []
     const total = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0)
     return total.toFixed(2)
   }, [orderData])
+
+  useEffect(() => {
+    if (tableData?.data.status === 'AVAILABLE') {
+      removeToken().then(() => {
+        router.replace('/thank-you')
+      })
+    }
+  }, [removeToken, router, tableData?.data.status])
 
   useEffect(() => {
     if (!tableId) {
@@ -80,7 +89,7 @@ export default function OrderScreen() {
   if (orderError) {
     return (
       <ErrorState
-        message="No pudimos cargar tu orden"
+        message={`No pudimos cargar tu orden ${orderError.message}`}
         onRetry={() => refetch()}
       />
     )
