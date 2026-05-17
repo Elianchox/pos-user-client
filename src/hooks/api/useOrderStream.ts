@@ -22,19 +22,17 @@ const initialStreamState: OrderStreamState = {
   sessionEnded: false,
 }
 
-export function useOrderStream(orderId: string) {
+export function useOrderStream() {
   const queryClient = useQueryClient()
   const [state, setState] = useState<OrderStreamState>(initialStreamState)
 
   useEffect(() => {
-    if (!orderId) return
-
     const controller = new AbortController()
     let isActive = true
 
     ;(async () => {
       try {
-        await subscribeOrderStream(orderId, {
+        await subscribeOrderStream({
           signal: controller.signal,
           onOpen: () => {
             if (!isActive) return
@@ -46,11 +44,32 @@ export function useOrderStream(orderId: string) {
               const base = { ...prev, isConnected: true }
 
               switch (event.event) {
-                case 'connected':
+                case 'connected': {
+                  const activeOrder = event.data.activeOrder
+                  if (activeOrder) {
+                    const payload: OrderDetailResponse = {
+                      success: true,
+                      data: {
+                        table: event.data.table,
+                        order: activeOrder,
+                      },
+                    }
+                    queryClient.setQueryData(['orderDetail'], payload)
+                  } else {
+                    queryClient.setQueryData(['orderDetail'], {
+                      success: true,
+                      data: { table: event.data.table, order: null },
+                    })
+                  }
+                  return base
+                }
                 case 'heartbeat':
                   return base
                 case 'order.item_added': {
-                  const added = event.data.items
+                  const added = event.data.items.map((item) => ({
+                    ...item,
+                    status: OrderStatusEnum.PENDING,
+                  }))
                   queryClient.setQueryData(['orderDetail'], (old: OrderDetailResponse | undefined) => {
                     if (!old?.data?.order?.items || added.length === 0) return old
                     const existingIds = new Set(old.data.order.items.map((i) => i.itemId))
@@ -135,7 +154,7 @@ export function useOrderStream(orderId: string) {
       controller.abort()
       setState(initialStreamState)
     }
-  }, [orderId, queryClient])
+  }, [queryClient])
 
   return state
 }
