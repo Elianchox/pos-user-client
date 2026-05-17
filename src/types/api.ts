@@ -52,6 +52,14 @@ export interface OrderItem {
   status: string
 }
 
+export interface StreamOrderItem {
+  itemId: string
+  productId: string
+  productName: string
+  price: string
+  imageUrl: string | null
+}
+
 export interface OrderDetailOrder {
   orderId: string
   status: string
@@ -96,13 +104,12 @@ export const STEAM_EVENT_TYPE_LIST = Object.values(OrderStreamEventEnum)
 export type OrderStreamEventType = `${OrderStreamEventEnum}`
 
 export interface ItemAddedData {
-  items: OrderItem[]
+  items: StreamOrderItem[]
 }
 
 export interface ConnectedData {
-  orderId: string
-  status: string
   table: TableStatus
+  activeOrder: OrderDetailOrder | null
   message: string
 }
 

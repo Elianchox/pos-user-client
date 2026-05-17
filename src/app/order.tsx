@@ -44,7 +44,7 @@ export default function OrderScreen() {
   const router = useRouter()
   const { tableId, removeToken } = useSession()
   const { data: orderData, isLoading: orderLoading, error: orderError, refetch } = useOrderDetail()
-  const { data: tableData } = useTableStatus(tableId ?? '')
+  const { data: tableData, isLoading: tableLoading } = useTableStatus(tableId ?? '')
   const orderId = orderData?.data?.order?.orderId ?? ''
 
   const stream = useOrderStream(orderId)
@@ -63,21 +63,21 @@ export default function OrderScreen() {
   useEffect(() => {
     if (tableData?.data.status === 'AVAILABLE') {
       removeToken().then(() => {
-        router.replace('/thank-you')
+        // router.replace('/thank-you')
       })
     }
   }, [removeToken, router, tableData?.data.status])
 
   useEffect(() => {
-    if (!tableId) {
-      router.replace('/thank-you')
+    if (!tableId && !tableLoading) {
+      // router.replace('/thank-you')
     }
-  }, [tableId, router, tableData?.data.status, removeToken])
+  }, [tableId, router, removeToken, tableLoading])
 
   useEffect(() => {
     if (stream.orderClosed || stream.sessionEnded) {
       removeToken().then(() => {
-        router.replace('/thank-you')
+        // router.replace('/thank-you')
       })
     }
   }, [stream.orderClosed, stream.sessionEnded, removeToken, router])

@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'expo-router'
-import * as Linking from 'expo-linking'
-import { getOrderDetail } from '@/services/api/endpoints'
-import { ApiError } from '@/services/api/client'
 import { useSession } from '@/context/SessionContext'
+import { ApiError } from '@/services/api/client'
+import { getOrderDetail } from '@/services/api/endpoints'
 import { parseQrUrl } from '@/utils/qr'
+import * as Linking from 'expo-linking'
+import { useRouter } from 'expo-router'
+import { useEffect, useRef, useState } from 'react'
 
 export function useSessionRestore() {
   const { token, tableId, removeToken, isLoading: sessionLoading } = useSession()
