@@ -37,5 +37,5 @@ export async function setCustomerName(name: string): Promise<void> {
 }
 
 export async function clearAll(): Promise<void> {
-  await AsyncStorage.multiRemove([TOKEN_KEY, TABLE_ID_KEY, CUSTOMER_NAME_KEY])
+  await AsyncStorage.multiRemove([TOKEN_KEY, TABLE_ID_KEY])
 }

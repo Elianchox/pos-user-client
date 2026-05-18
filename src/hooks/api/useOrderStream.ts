@@ -93,15 +93,21 @@ export function useOrderStream() {
                     status: OrderStatusEnum.PENDING,
                   }))
                   queryClient.setQueryData(['orderDetail'], (old: OrderDetailResponse | undefined) => {
-                    if (!old?.data?.order?.items || added.length === 0) return old
-                    const existingIds = new Set(old.data.order.items.map((i) => i.itemId))
+                    if (added.length === 0) return old
+                    const oldOrder = old?.data?.order
+                    const oldItems = oldOrder?.items ?? []
+                    const existingIds = new Set(oldItems.map((i) => i.itemId))
                     const newItems = added.filter((i) => !existingIds.has(i.itemId))
-                    if (newItems.length === 0) return old
+                    if (newItems.length === 0 && oldItems.length > 0) return old
                     return {
-                      ...old,
+                      success: true,
                       data: {
-                        ...old.data,
-                        order: { ...old.data.order, items: [...old.data.order.items, ...newItems] },
+                        table: old?.data?.table ?? null,
+                        order: {
+                          orderId: oldOrder?.orderId ?? '',
+                          status: oldOrder?.status ?? 'PENDING',
+                          items: [...oldItems, ...newItems],
+                        },
                       },
                     }
                   })
