@@ -17,6 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 type OrderStatusType = (typeof ORDER_ITEM_STATUS)[number]
 
+const SCROLL_BOTTOM_PADDING = 80
+
 interface GroupedItem {
   productId: string
   productName: string
@@ -50,10 +52,14 @@ const useStyles = makeStyles((t) => ({
     backgroundColor: t.background,
   },
   container: {
-    height: '100%',
+    flex: 1,
   },
   scrollView: {
     flex: 1,
+    paddingHorizontal: t.spacing[4],
+    paddingTop: t.spacing[4],
+  },
+  headerWrapper: {
     paddingHorizontal: t.spacing[4],
     paddingTop: t.spacing[4],
   },
@@ -154,7 +160,7 @@ export default function OrderScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+        <View style={styles.headerWrapper}>
           <Text style={styles.tableName}>
             {orderData?.data?.table?.name ?? `Mesa ${tableId ?? ''}`}
           </Text>
@@ -170,7 +176,7 @@ export default function OrderScreen() {
 
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={{ paddingBottom: 80 }}
+          contentContainerStyle={{ paddingBottom: SCROLL_BOTTOM_PADDING }}
         >
           {filteredGroups.length === 0 ? (
             <EmptyState
