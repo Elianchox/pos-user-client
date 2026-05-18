@@ -13,7 +13,7 @@ export default function ScanScreen() {
   const router = useRouter()
   const params = useLocalSearchParams()
   const paramTableId = Array.isArray(params.tableId) ? params.tableId[0] : params.tableId
-  const { token, saveTableId, customerName: savedName, saveCustomerName } = useSession()
+  const { token, saveToken, saveTableId, customerName: savedName, saveCustomerName } = useSession()
   const joinTableMutation = useJoinTable()
   const [scannedTableId, setScannedTableId] = useState<string | null>(paramTableId ?? null)
   const [customerName, setCustomerName] = useState(savedName ?? '')
@@ -42,18 +42,16 @@ export default function ScanScreen() {
     if (!scannedTableId) return
 
     const controller = new AbortController()
-    joinTableMutation.mutate(
-      { body: { tableId: scannedTableId, customerName: customerName || null }, signal: controller.signal },
-      {
-        onSuccess: () => {
-          saveCustomerName(customerName)
-          router.replace('/order')
-        },
-        onError: (error) => {
-          setScanError(`No se pudo unir a la mesa: ${error instanceof Error ? error.message : 'Error desconocido'}`)
-        },
-      },
-    )
+    try {
+      const result = await joinTableMutation.mutateAsync(
+        { body: { tableId: scannedTableId, customerName: customerName || null }, signal: controller.signal },
+      )
+      await saveToken(result.data.token)
+      saveCustomerName(customerName)
+      router.replace('/order')
+    } catch (error) {
+      setScanError(`No se pudo unir a la mesa: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+    }
   }
 
   return (
