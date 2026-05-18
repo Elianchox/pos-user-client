@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 import { makeStyles } from '@/theme/makeStyles'
 
@@ -31,6 +31,9 @@ const useStyles = makeStyles((t) => ({
     color: t.foreground,
     padding: 0,
   },
+  placeholderText: {
+    color: t.mutedForeground,
+  },
   clearButton: {
     padding: 4,
   },
@@ -40,25 +43,26 @@ const useStyles = makeStyles((t) => ({
   },
 }))
 
-export function ItemSearchInput({ onChange }: ItemSearchInputProps) {
+function ItemSearchInputInner({ onChange }: ItemSearchInputProps) {
   const styles = useStyles()
   const [text, setText] = useState('')
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debounce = useCallback(
-    debounceFn((value: string) => onChange(value), DEBOUNCE_MS),
+  const handleChangeText = useCallback(
+    (value: string) => {
+      setText(value)
+      if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => {
+        onChange(value)
+      }, DEBOUNCE_MS)
+    },
     [onChange],
   )
 
-  const handleChangeText = (value: string) => {
-    setText(value)
-    debounce(value)
-  }
-
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setText('')
     onChange('')
-  }
+  }, [onChange])
 
   return (
     <View style={styles.container}>
@@ -68,12 +72,13 @@ export function ItemSearchInput({ onChange }: ItemSearchInputProps) {
         value={text}
         onChangeText={handleChangeText}
         placeholder="Buscar item..."
-        placeholderTextColor={styles.searchIcon.color}
+        placeholderTextColor={styles.placeholderText.color}
         autoCapitalize="none"
         autoCorrect={false}
+        accessibilityLabel="Buscar item"
       />
       {text.length > 0 && (
-        <Pressable onPress={handleClear} style={styles.clearButton}>
+        <Pressable onPress={handleClear} style={styles.clearButton} accessibilityLabel="Limpiar búsqueda">
           <Text style={styles.clearIcon}>✕</Text>
         </Pressable>
       )}
@@ -81,10 +86,4 @@ export function ItemSearchInput({ onChange }: ItemSearchInputProps) {
   )
 }
 
-function debounceFn(fn: (value: string) => void, delay: number) {
-  let timer: ReturnType<typeof setTimeout> | null = null
-  return (value: string) => {
-    if (timer) clearTimeout(timer)
-    timer = setTimeout(() => fn(value), delay)
-  }
-}
+export const ItemSearchInput = React.memo(ItemSearchInputInner)

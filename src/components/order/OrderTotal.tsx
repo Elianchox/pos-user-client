@@ -1,4 +1,5 @@
 import { Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { makeStyles } from '@/theme/makeStyles'
 
 interface OrderTotalProps {
@@ -30,9 +31,10 @@ const useStyles = makeStyles((t) => ({
 
 export function OrderTotal({ total }: OrderTotalProps) {
   const styles = useStyles()
+  const insets = useSafeAreaInsets()
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom || 12 }]}>
       <Text style={styles.label}>Total</Text>
       <Text style={styles.amount}>${total}</Text>
     </View>
