@@ -1,5 +1,3 @@
-import '../global.css'
-
 import { SessionProvider } from '@/context/SessionContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { useDeepLink } from '@/hooks/useDeepLink'

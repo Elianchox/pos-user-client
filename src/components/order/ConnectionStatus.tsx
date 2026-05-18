@@ -1,19 +1,52 @@
 import { Text, View } from 'react-native'
+import { makeStyles } from '@/theme/makeStyles'
 
 interface ConnectionStatusProps {
   isConnected: boolean
   reconnecting?: boolean
 }
 
+const useStyles = makeStyles((t) => ({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 9999,
+  },
+  dotConnected: {
+    backgroundColor: t.success,
+  },
+  dotDisconnected: {
+    backgroundColor: t.destructive,
+  },
+  label: {
+    fontSize: 12,
+    color: t.mutedForeground,
+  },
+}))
+
+const RECONNECTING_COLOR = 'oklch(0.795 0.184 86.047)'
+
 export function ConnectionStatus({ isConnected, reconnecting }: ConnectionStatusProps) {
+  const styles = useStyles()
+
   return (
-    <View className="flex-row items-center gap-1.5">
+    <View style={styles.container}>
       <View
-        className={`w-2 h-2 rounded-full ${
-          reconnecting ? 'bg-yellow-500' : isConnected ? 'bg-success' : 'bg-destructive'
-        }`}
+        style={[
+          styles.dot,
+          reconnecting
+            ? { backgroundColor: RECONNECTING_COLOR }
+            : isConnected
+              ? styles.dotConnected
+              : styles.dotDisconnected,
+        ]}
       />
-      <Text className="text-xs text-muted-foreground">
+      <Text style={styles.label}>
         {reconnecting ? 'Reconectando...' : isConnected ? 'En vivo' : 'Desconectado'}
       </Text>
     </View>

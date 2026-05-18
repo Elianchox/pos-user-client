@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native'
 import { ConnectionStatus } from './ConnectionStatus'
+import { makeStyles } from '@/theme/makeStyles'
 
 interface OrderHeaderProps {
   tableName: string
@@ -8,16 +9,53 @@ interface OrderHeaderProps {
   reconnecting?: boolean
 }
 
+const useStyles = makeStyles((t) => ({
+  container: {
+    paddingHorizontal: t.spacing[4],
+    paddingVertical: t.spacing[4],
+    backgroundColor: t.card,
+    borderBottomWidth: 1,
+    borderBottomColor: t.border,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: t.spacing[2],
+  },
+  tableName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: t.cardForeground,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  totalLabel: {
+    fontSize: 14,
+    color: t.mutedForeground,
+  },
+  totalAmount: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: t.cardForeground,
+  },
+}))
+
 export function OrderHeader({ tableName, totalAmount, isConnected, reconnecting }: OrderHeaderProps) {
+  const styles = useStyles()
+
   return (
-    <View className="px-4 py-4 bg-card border-b border-border">
-      <View className="flex-row items-center justify-between mb-2">
-        <Text className="text-lg font-bold text-card-foreground">{tableName}</Text>
+    <View style={styles.container}>
+      <View style={styles.topRow}>
+        <Text style={styles.tableName}>{tableName}</Text>
         <ConnectionStatus isConnected={isConnected} reconnecting={reconnecting} />
       </View>
-      <View className="flex-row items-center justify-between">
-        <Text className="text-sm text-muted-foreground">Total</Text>
-        <Text className="text-xl font-bold text-card-foreground">${totalAmount}</Text>
+      <View style={styles.bottomRow}>
+        <Text style={styles.totalLabel}>Total</Text>
+        <Text style={styles.totalAmount}>${totalAmount}</Text>
       </View>
     </View>
   )

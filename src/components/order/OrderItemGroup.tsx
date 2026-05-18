@@ -3,6 +3,7 @@ import { LayoutAnimation, Pressable, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { StatusBadge } from './StatusBadge'
 import { OrderItemRow } from './OrderItemRow'
+import { makeStyles } from '@/theme/makeStyles'
 import type { OrderItem } from '@/types/api'
 
 interface OrderItemGroupProps {
@@ -13,6 +14,65 @@ interface OrderItemGroupProps {
   count: number
   items: OrderItem[]
 }
+
+const useStyles = makeStyles((t) => ({
+  container: {
+    backgroundColor: t.card,
+    borderRadius: t.radii.xl,
+    borderWidth: 1,
+    borderColor: t.border,
+    overflow: 'hidden',
+    marginBottom: t.spacing[3],
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: t.spacing[3],
+    gap: t.spacing[3],
+  },
+  imageContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: t.radii.lg,
+    backgroundColor: t.muted,
+    overflow: 'hidden',
+  },
+  imagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeholderText: {
+    color: t.mutedForeground,
+    fontSize: 20,
+  },
+  info: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: t.cardForeground,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: t.mutedForeground,
+    marginTop: 2,
+  },
+  badgeContainer: {
+    alignItems: 'flex-end',
+    gap: t.spacing[1],
+  },
+  chevron: {
+    fontSize: 12,
+    color: t.mutedForeground,
+  },
+  expanded: {
+    borderTopWidth: 1,
+    borderTopColor: t.border,
+  },
+}))
 
 function getMajorityStatus(items: OrderItem[]): string {
   const counts: Record<string, number> = {}
@@ -29,6 +89,7 @@ export const OrderItemGroup = React.memo(function OrderItemGroup({
   count,
   items,
 }: OrderItemGroupProps) {
+  const styles = useStyles()
   const [isOpen, setIsOpen] = useState(false)
   const majorityStatus = useMemo(() => getMajorityStatus(items), [items])
   const totalPrice = useMemo(() => {
@@ -42,35 +103,38 @@ export const OrderItemGroup = React.memo(function OrderItemGroup({
   }, [])
 
   return (
-    <View className="bg-card rounded-xl border border-border overflow-hidden mb-3">
-      <Pressable onPress={toggle} className="flex-row items-center p-3 gap-3 active:opacity-80">
-        <View className="w-14 h-14 rounded-lg bg-muted overflow-hidden">
+    <View style={styles.container}>
+      <Pressable
+        onPress={toggle}
+        style={({ pressed }) => [styles.row, pressed && { opacity: 0.8 }]}
+      >
+        <View style={styles.imageContainer}>
           {imageUrl ? (
             <Image source={{ uri: imageUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
           ) : (
-            <View className="w-full h-full items-center justify-center">
-              <Text className="text-muted-foreground text-xl">🍽️</Text>
+            <View style={styles.imagePlaceholder}>
+              <Text style={styles.placeholderText}>🍽️</Text>
             </View>
           )}
         </View>
 
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-card-foreground" numberOfLines={1}>
+        <View style={styles.info}>
+          <Text style={styles.productName} numberOfLines={1}>
             {productName}
           </Text>
-          <Text className="text-sm text-muted-foreground mt-0.5">
+          <Text style={styles.subtitle}>
             x{count} · ${totalPrice}
           </Text>
         </View>
 
-        <View className="items-end gap-1">
+        <View style={styles.badgeContainer}>
           <StatusBadge status={majorityStatus} />
-          <Text className="text-xs text-muted-foreground">{isOpen ? '▲' : '▼'}</Text>
+          <Text style={styles.chevron}>{isOpen ? '▲' : '▼'}</Text>
         </View>
       </Pressable>
 
       {isOpen && (
-        <View className="border-t border-border">
+        <View style={styles.expanded}>
           {items.map((item, idx) => (
             <OrderItemRow key={item.itemId} item={item} index={idx} />
           ))}

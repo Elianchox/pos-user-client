@@ -1,23 +1,61 @@
 import { CameraView } from 'expo-camera'
 import { Text, View } from 'react-native'
+import { makeStyles } from '@/theme/makeStyles'
 
 interface QrScannerProps {
   onBarcodeScanned: ({ data }: { data: string }) => void
 }
 
+const useStyles = makeStyles((t) => ({
+  container: {
+    flex: 1,
+    position: 'relative',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    pointerEvents: 'none',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scannerFrame: {
+    width: 256,
+    height: 256,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.5)',
+    borderRadius: t.radii.xl,
+  },
+  bottomLabel: {
+    position: 'absolute',
+    bottom: 32,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    color: '#ffffff',
+    fontSize: 14,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    paddingVertical: t.spacing[2],
+  },
+}))
+
 export function QrScanner({ onBarcodeScanned }: QrScannerProps) {
+  const styles = useStyles()
+
   return (
-    <View className="flex-1 relative">
+    <View style={styles.container}>
       <CameraView
         style={{ flex: 1 }}
         facing="back"
         barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
         onBarcodeScanned={onBarcodeScanned}
       />
-      <View className="absolute inset-0 pointer-events-none items-center justify-center">
-        <View className="w-64 h-64 border-2 border-white/50 rounded-xl" />
+      <View style={styles.overlay}>
+        <View style={styles.scannerFrame} />
       </View>
-      <Text className="absolute bottom-8 left-0 right-0 text-center text-white text-sm bg-black/40 py-2">
+      <Text style={styles.bottomLabel}>
         Enfoca el código QR de tu mesa
       </Text>
     </View>

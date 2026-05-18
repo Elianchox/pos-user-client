@@ -3,11 +3,55 @@ import { JoinTableForm } from '@/components/JoinTableForm'
 import { QrScanner } from '@/components/QrScanner'
 import { useSession } from '@/context/SessionContext'
 import { useJoinTable } from '@/hooks/api/useJoinTable'
+import { makeStyles } from '@/theme/makeStyles'
 import { parseQrUrl } from '@/utils/qr'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+
+const useStyles = makeStyles((t) => ({
+  safeArea: {
+    flex: 1,
+    backgroundColor: t.background,
+  },
+  container: {
+    height: '100%',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: t.spacing[4],
+    paddingVertical: t.spacing[4],
+    borderBottomWidth: 1,
+    borderBottomColor: t.border,
+  },
+  backButton: {
+    marginRight: t.spacing[3],
+  },
+  backText: {
+    fontSize: 24,
+    color: t.foreground,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: t.foreground,
+  },
+  errorContainer: {
+    marginHorizontal: t.spacing[4],
+    marginTop: t.spacing[3],
+    padding: t.spacing[3],
+    borderRadius: t.radii.lg,
+    borderWidth: 1,
+    borderColor: t.destructive,
+  },
+  errorText: {
+    fontSize: 14,
+    color: t.destructive,
+    textAlign: 'center',
+  },
+}))
 
 export default function ScanScreen() {
   const router = useRouter()
@@ -18,6 +62,7 @@ export default function ScanScreen() {
   const [scannedTableId, setScannedTableId] = useState<string | null>(paramTableId ?? null)
   const [customerName, setCustomerName] = useState(savedName ?? '')
   const [scanError, setScanError] = useState<string | null>(null)
+  const styles = useStyles()
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     if (scannedTableId || joinTableMutation.isPending) return
@@ -56,18 +101,18 @@ export default function ScanScreen() {
 
   return (
     <CameraPermissionGate>
-      <SafeAreaView className="flex-1 bg-background">
-        <View className="h-full">
-          <View className="flex-row items-center px-4 py-4 border-b border-border">
-            <TouchableOpacity onPress={() => router.back()} className="mr-3">
-              <Text className="text-2xl text-foreground">←</Text>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Text style={styles.backText}>←</Text>
             </TouchableOpacity>
-            <Text className="text-lg font-semibold text-foreground">Escanear QR</Text>
+            <Text style={styles.headerTitle}>Escanear QR</Text>
           </View>
 
           {scanError && (
-            <View className="mx-4 mt-3 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-              <Text className="text-sm text-destructive text-center">{scanError}</Text>
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{scanError}</Text>
             </View>
           )}
 

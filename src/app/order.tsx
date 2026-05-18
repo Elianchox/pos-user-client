@@ -6,6 +6,7 @@ import { LoadingState } from '@/components/ui/LoadingState'
 import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
 import { useOrderStream } from '@/hooks/api/useOrderStream'
+import { makeStyles } from '@/theme/makeStyles'
 import type { OrderItem } from '@/types/api'
 import { useRouter } from 'expo-router'
 import { useEffect, useMemo } from 'react'
@@ -39,12 +40,28 @@ function groupItems(items: OrderItem[]): GroupedItem[] {
   }))
 }
 
+const useStyles = makeStyles((t) => ({
+  safeArea: {
+    flex: 1,
+    backgroundColor: t.background,
+  },
+  container: {
+    height: '100%',
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: t.spacing[4],
+    paddingTop: t.spacing[4],
+  },
+}))
+
 export default function OrderScreen() {
   const router = useRouter()
   const { tableId, removeToken } = useSession()
   const { data: orderData, isLoading: orderLoading, error: orderError, refetch } = useOrderDetail()
 
   const stream = useOrderStream()
+  const styles = useStyles()
 
   const groups = useMemo(() => {
     const items = orderData?.data?.order?.items ?? []
@@ -87,8 +104,8 @@ export default function OrderScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className='h-full'>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
         <OrderHeader
           tableName={orderData?.data?.table?.name ?? `Mesa ${tableId ?? ''}`}
           totalAmount={totalAmount}
@@ -96,7 +113,7 @@ export default function OrderScreen() {
           reconnecting={stream.reconnecting}
         />
 
-        <ScrollView className="flex-1 px-4 pt-4" contentContainerStyle={{ paddingBottom: 24 }}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: 24 }}>
           {groups.length === 0 ? (
             <EmptyState message="Aún no hay productos en tu orden" />
           ) : (

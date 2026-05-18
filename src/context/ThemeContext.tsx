@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { useColorScheme, View } from 'react-native'
+import { createContext, useContext } from 'react'
+import { View } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
+import { useAppTheme } from '@/theme/useAppTheme'
 
 type Theme = 'light' | 'dark'
 
@@ -19,18 +20,12 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const systemScheme = useColorScheme()
-  const [theme, setTheme] = useState<Theme>(systemScheme ?? 'light')
-
-  useEffect(() => {
-    setTheme(systemScheme ?? 'light')
-  }, [systemScheme])
-
-  const isDark = theme === 'dark'
+  const { theme: themeObj, isDark } = useAppTheme()
+  const theme: Theme = isDark ? 'dark' : 'light'
 
   return (
     <ThemeContext.Provider value={{ theme, isDark }}>
-      <View className={`flex-1 bg-background ${isDark ? 'dark' : ''}`}>
+      <View style={{ flex: 1, backgroundColor: themeObj.background }}>
         <StatusBar style={isDark ? 'light' : 'dark'} />
         {children}
       </View>

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Text, View } from 'react-native'
 import { StatusBadge } from './StatusBadge'
+import { makeStyles } from '@/theme/makeStyles'
 import type { OrderItem } from '@/types/api'
 
 interface OrderItemRowProps {
@@ -8,14 +9,39 @@ interface OrderItemRowProps {
   index: number
 }
 
+const useStyles = makeStyles((t) => ({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: t.spacing[2],
+    paddingHorizontal: t.spacing[3],
+  },
+  left: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: t.spacing[2],
+  },
+  index: {
+    fontSize: 14,
+    color: t.mutedForeground,
+  },
+  price: {
+    fontSize: 14,
+    color: t.foreground,
+  },
+}))
+
 export const OrderItemRow = React.memo(function OrderItemRow({ item, index }: OrderItemRowProps) {
+  const styles = useStyles()
+
   return (
-    <View className="flex-row items-center justify-between py-2 px-3">
-      <View className="flex-row items-center gap-2">
-        <Text className="text-sm text-muted-foreground">#{index + 1}</Text>
+    <View style={styles.container}>
+      <View style={styles.left}>
+        <Text style={styles.index}>#{index + 1}</Text>
         <StatusBadge status={item.status} />
       </View>
-      <Text className="text-sm text-foreground">${item.price}</Text>
+      <Text style={styles.price}>${item.price}</Text>
     </View>
   )
 })
