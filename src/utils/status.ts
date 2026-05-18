@@ -12,15 +12,15 @@ export interface StatusColor {
   text: string
 }
 
-const WHITE = 'oklch(1 0 0)'
+const WHITE = '#ffffff'
 
 export const ORDER_ITEM_STATUS_COLORS: Record<string, StatusColor> = {
-  PENDING: { bg: 'oklch(0.795 0.184 86.047)', text: WHITE },
-  SENT_TO_KITCHEN: { bg: 'oklch(0.705 0.213 47.604)', text: WHITE },
-  PREPARING: { bg: 'oklch(0.623 0.214 259.815)', text: WHITE },
-  READY: { bg: 'oklch(0.627 0.194 149.21)', text: WHITE },
-  SERVED: { bg: 'oklch(0.72 0 0)', text: WHITE },
-  CANCELLED: { bg: 'oklch(0.637 0.237 25.331)', text: WHITE },
+  PENDING: { bg: '#eab308', text: WHITE },
+  SENT_TO_KITCHEN: { bg: '#f97316', text: WHITE },
+  PREPARING: { bg: '#3b82f6', text: WHITE },
+  READY: { bg: '#22c55e', text: WHITE },
+  SERVED: { bg: '#a1a1aa', text: WHITE },
+  CANCELLED: { bg: '#ef4444', text: WHITE },
 }
 
 export function getStatusLabel(status: string): string {
@@ -28,5 +28,5 @@ export function getStatusLabel(status: string): string {
 }
 
 export function getStatusColor(status: string): StatusColor {
-  return ORDER_ITEM_STATUS_COLORS[status] ?? { bg: 'oklch(0.72 0 0)', text: WHITE }
+  return ORDER_ITEM_STATUS_COLORS[status] ?? { bg: '#a1a1aa', text: WHITE }
 }

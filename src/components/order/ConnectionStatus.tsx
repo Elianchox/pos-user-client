@@ -29,7 +29,7 @@ const useStyles = makeStyles((t) => ({
   },
 }))
 
-const RECONNECTING_COLOR = 'oklch(0.795 0.184 86.047)'
+const RECONNECTING_COLOR = '#eab308'
 
 export function ConnectionStatus({ isConnected, reconnecting }: ConnectionStatusProps) {
   const styles = useStyles()
