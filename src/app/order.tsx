@@ -9,13 +9,11 @@ import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
 import { useOrderStream } from '@/hooks/api/useOrderStream'
 import { makeStyles } from '@/theme/makeStyles'
-import { ORDER_ITEM_STATUS, type OrderItem } from '@/types/api'
+import { type OrderItem, type OrderItemStatusType } from '@/types/api'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-type OrderStatusType = (typeof ORDER_ITEM_STATUS)[number]
 
 const SCROLL_BOTTOM_PADDING = 80
 
@@ -79,7 +77,7 @@ export default function OrderScreen() {
   const stream = useOrderStream()
   const styles = useStyles()
 
-  const [activeStatuses, setActiveStatuses] = useState<OrderStatusType[] | null>(null)
+  const [activeStatuses, setActiveStatuses] = useState<OrderItemStatusType[] | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   const allGroups = useMemo(() => {
@@ -91,7 +89,7 @@ export default function OrderScreen() {
     return allGroups.filter((group) => {
       const matchesStatus =
         activeStatuses === null ||
-        group.items.some((item) => activeStatuses.includes(item.status as OrderStatusType))
+        group.items.some((item) => activeStatuses.includes(item.status as OrderItemStatusType))
 
       const matchesSearch =
         searchQuery === '' ||
@@ -107,7 +105,7 @@ export default function OrderScreen() {
     return total.toFixed(2)
   }, [orderData])
 
-  const handleToggleStatus = useCallback((status: OrderStatusType) => {
+  const handleToggleStatus = useCallback((status: OrderItemStatusType) => {
     setActiveStatuses((prev) => {
       if (prev === null) {
         return [status]
@@ -162,7 +160,7 @@ export default function OrderScreen() {
       <View style={styles.container}>
         <View style={styles.headerWrapper}>
           <Text style={styles.tableName}>
-            {orderData?.data?.table?.name ?? `Mesa ${tableId ?? ''}`}
+            {orderData?.data?.table?.name ?? (tableId ? `Mesa ${tableId}` : 'Mesa')}
           </Text>
 
           <OrderFilterBar

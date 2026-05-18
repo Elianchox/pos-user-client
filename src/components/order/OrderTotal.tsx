@@ -34,7 +34,7 @@ export function OrderTotal({ total }: OrderTotalProps) {
   const insets = useSafeAreaInsets()
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom || 12 }]}>
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 12) }]}>
       <Text style={styles.label}>Total</Text>
       <Text style={styles.amount}>${total}</Text>
     </View>

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
 import { makeStyles } from '@/theme/makeStyles'
 
@@ -47,6 +47,12 @@ function ItemSearchInputInner({ onChange }: ItemSearchInputProps) {
   const styles = useStyles()
   const [text, setText] = useState('')
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const handleChangeText = useCallback(
     (value: string) => {
