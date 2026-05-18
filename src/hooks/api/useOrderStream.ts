@@ -1,7 +1,7 @@
 import { subscribeOrderStream } from '@/services/sse/client'
 import { OrderStatusEnum, OrderStreamEventType, type OrderDetailResponse, type OrderItemStatusType } from '@/types/api'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const STATUS_MAP: Partial<Record<OrderStreamEventType, OrderItemStatusType>> = {
   'order.item_sent_to_kitchen': OrderStatusEnum.SENT_TO_KITCHEN,
@@ -12,31 +12,46 @@ const STATUS_MAP: Partial<Record<OrderStreamEventType, OrderItemStatusType>> = {
 
 export interface OrderStreamState {
   isConnected: boolean
+  reconnecting: boolean
+  reconnectFailed: boolean
   orderClosed: boolean
   sessionEnded: boolean
 }
 
 const initialStreamState: OrderStreamState = {
   isConnected: false,
+  reconnecting: false,
+  reconnectFailed: false,
   orderClosed: false,
   sessionEnded: false,
 }
 
+const MAX_RECONNECT_ATTEMPTS = 2
+const RETRY_DELAY_MS = 3000
+
 export function useOrderStream() {
   const queryClient = useQueryClient()
   const [state, setState] = useState<OrderStreamState>(initialStreamState)
+  const stateRef = useRef(state)
+  stateRef.current = state
 
   useEffect(() => {
-    const controller = new AbortController()
     let isActive = true
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null
+    let currentController: AbortController | null = null
+    let attemptCount = 0
 
-    ;(async () => {
+    async function start() {
+      const controller = new AbortController()
+      currentController = controller
+
       try {
         await subscribeOrderStream({
           signal: controller.signal,
           onOpen: () => {
             if (!isActive) return
-            setState((prev) => ({ ...prev, isConnected: true }))
+            attemptCount = 0
+            setState((prev) => ({ ...prev, isConnected: true, reconnecting: false }))
           },
           onEvent: (event) => {
             if (!isActive) return
@@ -137,21 +152,37 @@ export function useOrderStream() {
           },
           onError: () => {
             if (!isActive) return
-            console.error('SSE connection error')
-            setState((prev) => ({ ...prev, isConnected: false }))
+            attemptCount++
+
+            if (attemptCount >= MAX_RECONNECT_ATTEMPTS) {
+              setState((prev) => ({ ...prev, isConnected: false, reconnectFailed: true }))
+              return
+            }
+
+            setState((prev) => ({ ...prev, isConnected: false, reconnecting: true }))
+            retryTimeout = setTimeout(start, RETRY_DELAY_MS)
           },
         })
       } catch (err) {
         console.error('SSE subscription setup failed:', err)
-        if (isActive) {
-          setState((prev) => ({ ...prev, isConnected: false }))
+        if (!isActive) return
+        attemptCount++
+
+        if (attemptCount >= MAX_RECONNECT_ATTEMPTS) {
+          setState((prev) => ({ ...prev, isConnected: false, reconnectFailed: true }))
+        } else {
+          setState((prev) => ({ ...prev, isConnected: false, reconnecting: true }))
+          retryTimeout = setTimeout(start, RETRY_DELAY_MS)
         }
       }
-    })()
+    }
+
+    start()
 
     return () => {
       isActive = false
-      controller.abort()
+      if (retryTimeout) clearTimeout(retryTimeout)
+      if (currentController) currentController.abort()
       setState(initialStreamState)
     }
   }, [queryClient])
