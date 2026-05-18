@@ -1,5 +1,7 @@
-import { OrderHeader } from '@/components/order/OrderHeader'
+import { ItemSearchInput } from '@/components/order/ItemSearchInput'
+import { OrderFilterBar } from '@/components/order/OrderFilterBar'
 import { OrderItemGroup } from '@/components/order/OrderItemGroup'
+import { OrderTotal } from '@/components/order/OrderTotal'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
@@ -7,11 +9,13 @@ import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
 import { useOrderStream } from '@/hooks/api/useOrderStream'
 import { makeStyles } from '@/theme/makeStyles'
-import type { OrderItem } from '@/types/api'
+import { ORDER_ITEM_STATUS, type OrderItem } from '@/types/api'
 import { useRouter } from 'expo-router'
-import { useEffect, useMemo } from 'react'
-import { ScrollView, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+
+type OrderStatusType = (typeof ORDER_ITEM_STATUS)[number]
 
 interface GroupedItem {
   productId: string
@@ -53,6 +57,12 @@ const useStyles = makeStyles((t) => ({
     paddingHorizontal: t.spacing[4],
     paddingTop: t.spacing[4],
   },
+  tableName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: t.foreground,
+    marginBottom: t.spacing[3],
+  },
 }))
 
 export default function OrderScreen() {
@@ -63,16 +73,54 @@ export default function OrderScreen() {
   const stream = useOrderStream()
   const styles = useStyles()
 
-  const groups = useMemo(() => {
+  const [activeStatuses, setActiveStatuses] = useState<OrderStatusType[] | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const allGroups = useMemo(() => {
     const items = orderData?.data?.order?.items ?? []
     return groupItems(items)
   }, [orderData])
+
+  const filteredGroups = useMemo(() => {
+    return allGroups.filter((group) => {
+      const matchesStatus =
+        activeStatuses === null ||
+        group.items.some((item) => activeStatuses.includes(item.status as OrderStatusType))
+
+      const matchesSearch =
+        searchQuery === '' ||
+        group.productName.toLowerCase().includes(searchQuery.toLowerCase())
+
+      return matchesStatus && matchesSearch
+    })
+  }, [allGroups, activeStatuses, searchQuery])
 
   const totalAmount = useMemo(() => {
     const items = orderData?.data?.order?.items ?? []
     const total = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0)
     return total.toFixed(2)
   }, [orderData])
+
+  const handleToggleStatus = useCallback((status: OrderStatusType) => {
+    setActiveStatuses((prev) => {
+      if (prev === null) {
+        return [status]
+      }
+      if (prev.includes(status)) {
+        const next = prev.filter((s) => s !== status)
+        return next.length === 0 ? null : next
+      }
+      return [...prev, status]
+    })
+  }, [])
+
+  const handleClearFilters = useCallback(() => {
+    setActiveStatuses(null)
+  }, [])
+
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query)
+  }, [])
 
   useEffect(() => {
     if (stream.orderClosed || stream.sessionEnded) {
@@ -106,18 +154,34 @@ export default function OrderScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <OrderHeader
-          tableName={orderData?.data?.table?.name ?? `Mesa ${tableId ?? ''}`}
-          totalAmount={totalAmount}
-          isConnected={stream.isConnected}
-          reconnecting={stream.reconnecting}
-        />
+        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          <Text style={styles.tableName}>
+            {orderData?.data?.table?.name ?? `Mesa ${tableId ?? ''}`}
+          </Text>
 
-        <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: 24 }}>
-          {groups.length === 0 ? (
-            <EmptyState message="Aún no hay productos en tu orden" />
+          <OrderFilterBar
+            activeStatuses={activeStatuses}
+            onToggle={handleToggleStatus}
+            onClearAll={handleClearFilters}
+          />
+
+          <ItemSearchInput onChange={handleSearch} />
+        </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={{ paddingBottom: 80 }}
+        >
+          {filteredGroups.length === 0 ? (
+            <EmptyState
+              message={
+                allGroups.length === 0
+                  ? 'Aún no hay productos en tu orden'
+                  : 'No se encontraron items con los filtros actuales'
+              }
+            />
           ) : (
-            groups.map((group) => (
+            filteredGroups.map((group) => (
               <OrderItemGroup
                 key={group.productId}
                 productId={group.productId}
@@ -130,6 +194,8 @@ export default function OrderScreen() {
             ))
           )}
         </ScrollView>
+
+        <OrderTotal total={totalAmount} />
       </View>
     </SafeAreaView>
   )
