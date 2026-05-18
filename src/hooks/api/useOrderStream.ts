@@ -1,14 +1,7 @@
 import { subscribeOrderStream } from '@/services/sse/client'
-import { OrderStatusEnum, OrderStreamEventType, type OrderDetailResponse, type OrderItemStatusType } from '@/types/api'
+import { type OrderDetailResponse } from '@/types/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-
-const STATUS_MAP: Partial<Record<OrderStreamEventType, OrderItemStatusType>> = {
-  'order.item_sent_to_kitchen': OrderStatusEnum.SENT_TO_KITCHEN,
-  'order.item_ready': OrderStatusEnum.READY,
-  'order.item_served': OrderStatusEnum.SERVED,
-  'order.item_cancelled': OrderStatusEnum.CANCELLED,
-}
 
 export interface OrderStreamState {
   isConnected: boolean
@@ -88,10 +81,7 @@ export function useOrderStream() {
                 case 'heartbeat':
                   return base
                 case 'order.item_added': {
-                  const added = event.data.items.map((item) => ({
-                    ...item,
-                    status: OrderStatusEnum.PENDING,
-                  }))
+                  const added = event.data.items
                   queryClient.setQueryData(['orderDetail'], (old: OrderDetailResponse | undefined) => {
                     if (added.length === 0) return old
                     const oldOrder = old?.data?.order
@@ -114,7 +104,7 @@ export function useOrderStream() {
                   return base
                 }
                 case 'order.item_sent_to_kitchen': {
-                  const status = STATUS_MAP[event.event]
+                  const status = event.data.status
                   queryClient.setQueryData(['orderDetail'], (old: OrderDetailResponse | undefined) => {
                     if (!old?.data?.order?.items) return old
                     const ids = new Set(event.data.itemIds)
@@ -136,7 +126,7 @@ export function useOrderStream() {
                 case 'order.item_ready':
                 case 'order.item_served':
                 case 'order.item_cancelled': {
-                  const status = event.data.status ?? STATUS_MAP[event.event]
+                  const status = event.data.status
                   queryClient.setQueryData(['orderDetail'], (old: OrderDetailResponse | undefined) => {
                     if (!old?.data?.order?.items) return old
                     return {
@@ -147,6 +137,26 @@ export function useOrderStream() {
                           ...old.data.order,
                           items: old.data.order.items.map((item) =>
                             item.itemId === event.data.itemId ? { ...item, status } : item
+                          ),
+                        },
+                      },
+                    }
+                  })
+                  return base
+                }
+                case 'order.item_status_changed': {
+                  queryClient.setQueryData(['orderDetail'], (old: OrderDetailResponse | undefined) => {
+                    if (!old?.data?.order?.items) return old
+                    return {
+                      ...old,
+                      data: {
+                        ...old.data,
+                        order: {
+                          ...old.data.order,
+                          items: old.data.order.items.map((item) =>
+                            item.itemId === event.data.itemId
+                              ? { ...item, status: event.data.newStatus }
+                              : item
                           ),
                         },
                       },

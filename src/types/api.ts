@@ -58,6 +58,7 @@ export interface StreamOrderItem {
   productName: string
   price: string
   imageUrl: string | null
+  status: string
 }
 
 export interface OrderDetailOrder {
@@ -97,6 +98,7 @@ export enum OrderStreamEventEnum  {
   PaymentReceived = 'order.payment_received',
   OrderClosed = 'order.order_closed',
   SessionEnded = 'session.ended',
+  ItemStatusChanged = 'order.item_status_changed',
 }
 
 export const STEAM_EVENT_TYPE_LIST = Object.values(OrderStreamEventEnum)
@@ -116,6 +118,7 @@ export interface ConnectedData {
 export interface ItemSentToKitchenData {
   itemIds: string[]
   stations: string[]
+  status: string
 }
 
 export interface ItemStatusData {
@@ -126,6 +129,13 @@ export interface ItemStatusData {
 
 export interface ItemCancelledData extends ItemStatusData {
   reason?: string
+}
+
+export interface ItemStatusChangedData {
+  itemId: string
+  productName: string
+  prevStatus: string
+  newStatus: string
 }
 
 export interface PaymentReceivedData {
@@ -174,4 +184,7 @@ export type OrderStreamEvent = {
 } | {
   event: OrderStreamEventEnum.SessionEnded
   data: SessionEndedData
+} | {
+  event: OrderStreamEventEnum.ItemStatusChanged
+  data: ItemStatusChangedData
 }
