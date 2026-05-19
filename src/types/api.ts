@@ -25,15 +25,21 @@ export interface JoinTableResponse {
 
 
 export enum OrderStatusEnum {
-  PENDING = 'PENDING',
+  DRAFT = 'DRAFT',
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  PENDING_PAYMENT = 'PENDING_PAYMENT',
+  PAID = 'PAID',
+  CANCELLED = 'CANCELLED',
+  CLOSED = 'CLOSED',
   SENT_TO_KITCHEN = 'SENT_TO_KITCHEN',
   PREPARING = 'PREPARING',
   READY = 'READY',
   SERVED = 'SERVED',
-  CANCELLED = 'CANCELLED',
 }
 export const ORDER_ITEM_STATUS = Object.values(OrderStatusEnum)
 export type OrderItemStatusType = typeof ORDER_ITEM_STATUS[number];
+export type OrderStatus = `${OrderStatusEnum}`
 
 export interface TableStatus {
   id: string
@@ -49,7 +55,7 @@ export interface OrderItem {
   productName: string
   price: string
   imageUrl: string | null
-  status: string
+  status: OrderItemStatusType
 }
 
 export interface StreamOrderItem {
@@ -58,12 +64,12 @@ export interface StreamOrderItem {
   productName: string
   price: string
   imageUrl: string | null
-  status: string
+  status: OrderItemStatusType
 }
 
 export interface OrderDetailOrder {
   orderId: string
-  status: string
+  status: OrderStatus
   items: OrderItem[]
   totalAmount: string
 }
@@ -74,7 +80,7 @@ export interface OrderDetailResponse {
 }
 
 export interface OrderItemStatus {
-  value: string
+  value: OrderItemStatusType
   label: string
 }
 
