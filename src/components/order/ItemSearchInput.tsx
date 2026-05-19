@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Pressable, Text, TextInput, View } from 'react-native'
+import { Pressable, TextInput, View } from 'react-native'
+import { Search, X } from 'lucide-react-native'
 import { makeStyles } from '@/theme/makeStyles'
 
 interface ItemSearchInputProps {
@@ -21,10 +22,6 @@ const useStyles = makeStyles((t) => ({
     marginBottom: t.spacing[3],
     gap: t.spacing[2],
   },
-  searchIcon: {
-    fontSize: 16,
-    color: t.mutedForeground,
-  },
   input: {
     flex: 1,
     fontSize: 14,
@@ -36,10 +33,6 @@ const useStyles = makeStyles((t) => ({
   },
   clearButton: {
     padding: 4,
-  },
-  clearIcon: {
-    fontSize: 16,
-    color: t.mutedForeground,
   },
 }))
 
@@ -72,7 +65,7 @@ function ItemSearchInputInner({ onChange }: ItemSearchInputProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.searchIcon}>🔍</Text>
+      <Search size={18} color={styles.placeholderText.color} />
       <TextInput
         style={styles.input}
         value={text}
@@ -85,7 +78,7 @@ function ItemSearchInputInner({ onChange }: ItemSearchInputProps) {
       />
       {text.length > 0 && (
         <Pressable onPress={handleClear} style={styles.clearButton} accessibilityLabel="Limpiar búsqueda">
-          <Text style={styles.clearIcon}>✕</Text>
+          <X size={18} color={styles.placeholderText.color} />
         </Pressable>
       )}
     </View>

@@ -1,5 +1,6 @@
 import React, { memo } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
+import { X } from 'lucide-react-native'
 import { getStatusLabel, ORDER_ITEM_STATUS_COLORS } from '@/utils/status'
 import { ORDER_ITEM_STATUS, OrderItemStatusType } from '@/types/api'
 import { makeStyles } from '@/theme/makeStyles'
@@ -36,8 +37,6 @@ const useStyles = makeStyles((t) => ({
     backgroundColor: t.muted,
   },
   clearLabel: {
-    fontSize: 13,
-    fontWeight: '600',
     color: t.mutedForeground,
   },
   todosInactiveLabel: {
@@ -108,7 +107,7 @@ export const OrderFilterBar = memo(function OrderFilterBar({ activeStatuses, onT
 
           {hasActiveFilters && (
             <Pressable onPress={onClearAll} style={styles.clearButton} accessibilityRole="button" accessibilityState={{ selected: false }}>
-              <Text style={styles.clearLabel}>✕</Text>
+              <X size={14} color={styles.clearLabel.color} />
             </Pressable>
           )}
         </View>

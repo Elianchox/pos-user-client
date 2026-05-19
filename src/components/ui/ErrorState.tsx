@@ -1,4 +1,5 @@
 import { Text, TouchableOpacity, View } from 'react-native'
+import { AlertTriangle } from 'lucide-react-native'
 import { makeStyles } from '@/theme/makeStyles'
 
 interface ErrorStateProps {
@@ -12,10 +13,6 @@ const useStyles = makeStyles((t) => ({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: t.spacing[6],
-  },
-  icon: {
-    fontSize: 36,
-    marginBottom: t.spacing[4],
   },
   title: {
     fontSize: 18,
@@ -41,7 +38,7 @@ export function ErrorState({ message = 'Algo salió mal', onRetry }: ErrorStateP
 
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>⚠️</Text>
+      <AlertTriangle size={36} color={styles.title.color} style={{ marginBottom: 16 }} />
       <Text style={styles.title}>{message}</Text>
       {onRetry && (
         <TouchableOpacity onPress={onRetry} style={styles.retryButton}>

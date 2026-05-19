@@ -1,4 +1,5 @@
 import { Text, View } from 'react-native'
+import { Inbox } from 'lucide-react-native'
 import { makeStyles } from '@/theme/makeStyles'
 
 interface EmptyStateProps {
@@ -12,10 +13,6 @@ const useStyles = makeStyles((t) => ({
     justifyContent: 'center',
     paddingHorizontal: t.spacing[6],
   },
-  icon: {
-    fontSize: 36,
-    marginBottom: t.spacing[4],
-  },
   message: {
     fontSize: 18,
     color: t.mutedForeground,
@@ -28,7 +25,7 @@ export function EmptyState({ message = 'No hay datos' }: EmptyStateProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>📭</Text>
+      <Inbox size={36} color={styles.message.color} style={{ marginBottom: 16 }} />
       <Text style={styles.message}>{message}</Text>
     </View>
   )
