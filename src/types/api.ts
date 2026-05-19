@@ -65,6 +65,7 @@ export interface OrderDetailOrder {
   orderId: string
   status: string
   items: OrderItem[]
+  totalAmount: string
 }
 
 export interface OrderDetailResponse {
@@ -107,6 +108,7 @@ export type OrderStreamEventType = `${OrderStreamEventEnum}`
 
 export interface ItemAddedData {
   items: StreamOrderItem[]
+  totalAmount: string
 }
 
 export interface ConnectedData {
@@ -129,6 +131,7 @@ export interface ItemStatusData {
 
 export interface ItemCancelledData extends ItemStatusData {
   reason?: string
+  totalAmount: string
 }
 
 export interface ItemStatusChangedData {

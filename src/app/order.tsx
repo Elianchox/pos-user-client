@@ -99,11 +99,7 @@ export default function OrderScreen() {
     })
   }, [allGroups, activeStatuses, searchQuery])
 
-  const totalAmount = useMemo(() => {
-    const items = orderData?.data?.order?.items ?? []
-    const total = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0)
-    return total.toFixed(2)
-  }, [orderData])
+  const totalAmount = orderData?.data?.order?.totalAmount ?? '0.00'
 
   const handleToggleStatus = useCallback((status: OrderItemStatusType) => {
     setActiveStatuses((prev) => {
@@ -194,6 +190,7 @@ export default function OrderScreen() {
                 price={group.price}
                 count={group.count}
                 items={group.items}
+                activeStatuses={activeStatuses}
               />
             ))
           )}

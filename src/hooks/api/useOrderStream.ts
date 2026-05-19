@@ -97,6 +97,7 @@ export function useOrderStream() {
                           orderId: oldOrder?.orderId ?? '',
                           status: oldOrder?.status ?? 'PENDING',
                           items: [...oldItems, ...newItems],
+                          totalAmount: event.data.totalAmount,
                         },
                       },
                     }
@@ -124,7 +125,25 @@ export function useOrderStream() {
                   return base
                 }
                 case 'order.item_ready':
-                case 'order.item_served':
+                case 'order.item_served': {
+                  const status = event.data.status
+                  queryClient.setQueryData(['orderDetail'], (old: OrderDetailResponse | undefined) => {
+                    if (!old?.data?.order?.items) return old
+                    return {
+                      ...old,
+                      data: {
+                        ...old.data,
+                        order: {
+                          ...old.data.order,
+                          items: old.data.order.items.map((item) =>
+                            item.itemId === event.data.itemId ? { ...item, status } : item
+                          ),
+                        },
+                      },
+                    }
+                  })
+                  return base
+                }
                 case 'order.item_cancelled': {
                   const status = event.data.status
                   queryClient.setQueryData(['orderDetail'], (old: OrderDetailResponse | undefined) => {
@@ -138,6 +157,7 @@ export function useOrderStream() {
                           items: old.data.order.items.map((item) =>
                             item.itemId === event.data.itemId ? { ...item, status } : item
                           ),
+                          totalAmount: event.data.totalAmount,
                         },
                       },
                     }

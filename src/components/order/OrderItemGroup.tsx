@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { LayoutAnimation, Pressable, Text, View } from 'react-native'
 import { Image } from 'expo-image'
-import { StatusBadge } from './StatusBadge'
+import { Clock, Flame, ChefHat, Bell, CheckCheck, XCircle } from 'lucide-react-native'
 import { OrderItemRow } from './OrderItemRow'
 import { makeStyles } from '@/theme/makeStyles'
-import type { OrderItem } from '@/types/api'
+import type { OrderItem, OrderItemStatusType } from '@/types/api'
+import { getStatusColor } from '@/utils/status'
 
 interface OrderItemGroupProps {
   productId: string
@@ -13,6 +14,7 @@ interface OrderItemGroupProps {
   price: string
   count: number
   items: OrderItem[]
+  activeStatuses: OrderItemStatusType[] | null
 }
 
 const useStyles = makeStyles((t) => ({
@@ -61,8 +63,27 @@ const useStyles = makeStyles((t) => ({
     marginTop: 2,
   },
   badgeContainer: {
-    alignItems: 'flex-end',
-    gap: t.spacing[1],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: t.spacing[2],
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: t.spacing[2],
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 9999,
+    gap: 4,
+  },
+  statusCount: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#ffffff',
   },
   chevron: {
     fontSize: 12,
@@ -74,12 +95,83 @@ const useStyles = makeStyles((t) => ({
   },
 }))
 
-function getMajorityStatus(items: OrderItem[]): string {
+function getStatusCounts(items: OrderItem[]): Record<string, number> {
   const counts: Record<string, number> = {}
   items.forEach((i) => {
     counts[i.status] = (counts[i.status] || 0) + 1
   })
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? items[0]?.status ?? ''
+  return counts
+}
+
+interface StatusGroup {
+  status: string
+  count: number
+  totalPrice: string
+}
+
+function groupItemsByStatus(items: OrderItem[]): StatusGroup[] {
+  const map = new Map<string, { count: number; totalPrice: number }>()
+  for (const item of items) {
+    const existing = map.get(item.status) || { count: 0, totalPrice: 0 }
+    existing.count += 1
+    existing.totalPrice += parseFloat(item.price) || 0
+    map.set(item.status, existing)
+  }
+  return Array.from(map.entries()).map(([status, { count, totalPrice }]) => ({
+    status,
+    count,
+    totalPrice: totalPrice.toFixed(2),
+  }))
+}
+
+const STATUS_ICONS: Record<string, React.ComponentType<{ size: number; color: string }>> = {
+  PENDING: Clock,
+  SENT_TO_KITCHEN: Flame,
+  PREPARING: ChefHat,
+  READY: Bell,
+  SERVED: CheckCheck,
+  CANCELLED: XCircle,
+}
+
+function StatusCounts({ items }: { items: OrderItem[] }) {
+  const styles = useStyles()
+  const counts = useMemo(() => getStatusCounts(items), [items])
+
+  const priorityOrder = ['SENT_TO_KITCHEN', 'PREPARING', 'READY', 'PENDING', 'CANCELLED', 'SERVED']
+
+  const activeStatuses = Object.entries(counts)
+    .filter(([, count]) => count > 0)
+    .sort((a, b) => {
+      const aIdx = priorityOrder.indexOf(a[0])
+      const bIdx = priorityOrder.indexOf(b[0])
+      return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx)
+    })
+
+  if (activeStatuses.length === 0) return null
+
+  const maxVisible = 2
+  const visible = activeStatuses.slice(0, maxVisible)
+  const remaining = activeStatuses.length - maxVisible
+
+  return (
+    <View style={styles.statusRow}>
+      {visible.map(([status, count]) => {
+        const Icon = STATUS_ICONS[status] ?? Clock
+        const colors = getStatusColor(status)
+        return (
+          <View key={status} style={[styles.statusBadge, { backgroundColor: colors.bg }]}>
+            <Icon size={14} color="#ffffff" />
+            <Text style={styles.statusCount}>{count}</Text>
+          </View>
+        )
+      })}
+      {remaining > 0 && (
+        <View style={[styles.statusBadge, { backgroundColor: '#71717a' }]}>
+          <Text style={styles.statusCount}>+{remaining}</Text>
+        </View>
+      )}
+    </View>
+  )
 }
 
 export const OrderItemGroup = React.memo(function OrderItemGroup({
@@ -88,10 +180,10 @@ export const OrderItemGroup = React.memo(function OrderItemGroup({
   price,
   count,
   items,
+  activeStatuses,
 }: OrderItemGroupProps) {
   const styles = useStyles()
   const [isOpen, setIsOpen] = useState(false)
-  const majorityStatus = useMemo(() => getMajorityStatus(items), [items])
   const totalPrice = useMemo(() => {
     const unit = parseFloat(price) || 0
     return (unit * count).toFixed(2)
@@ -128,16 +220,18 @@ export const OrderItemGroup = React.memo(function OrderItemGroup({
         </View>
 
         <View style={styles.badgeContainer}>
-          <StatusBadge status={majorityStatus} />
+          <StatusCounts items={items} />
           <Text style={styles.chevron}>{isOpen ? '▲' : '▼'}</Text>
         </View>
       </Pressable>
 
       {isOpen && (
         <View style={styles.expanded}>
-          {items.map((item, idx) => (
-            <OrderItemRow key={item.itemId} item={item} index={idx} />
-          ))}
+          {groupItemsByStatus(items)
+            .filter(({ status }) => activeStatuses === null || activeStatuses.includes(status as OrderItemStatusType))
+            .map(({ status, count, totalPrice }, idx) => (
+              <OrderItemRow key={`${status}-${idx}`} status={status} count={count} totalPrice={totalPrice} index={idx} />
+            ))}
         </View>
       )}
     </View>
