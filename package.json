@@ -10,8 +10,8 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@microsoft/fetch-event-source": "^2.0.1",
     "@expo/metro-runtime": "^6.1.2",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/elements": "^2.9.10",
@@ -44,8 +44,10 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "@typescript-eslint/parser": "^8.59.4",
     "eslint": "^9.0.0",
     "eslint-config-expo": "^10.0.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "typescript": "~5.9.2"
   },
   "private": true
