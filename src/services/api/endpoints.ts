@@ -1,4 +1,4 @@
-import { ENDPOINTS } from '@/constants/api'
+import { ENDPOINTS } from '@/constants/api';
 import type {
   JoinTableRequest,
   JoinTableResponse,
@@ -6,8 +6,8 @@ import type {
   OrderDetailResponse,
   OrderItemStatusesResponse,
   TableStatus,
-} from '@/types/api'
-import { apiFetch } from './client'
+} from '@/types/api';
+import { apiFetch } from './client';
 
 export function joinTable(body: JoinTableRequest, signal?: AbortSignal) {
   return apiFetch<JoinTableResponse>(ENDPOINTS.joinTable, { method: 'POST', body }, signal)
