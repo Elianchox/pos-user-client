@@ -5,6 +5,7 @@ import { useSession } from '@/context/SessionContext'
 import { useJoinTable } from '@/hooks/api/useJoinTable'
 import { makeStyles } from '@/theme/makeStyles'
 import { parseQrUrl } from '@/utils/qr'
+import { useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
@@ -55,6 +56,7 @@ const useStyles = makeStyles((t) => ({
 
 export default function ScanScreen() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const params = useLocalSearchParams()
   const paramTableId = Array.isArray(params.tableId) ? params.tableId[0] : params.tableId
   const { token, saveToken, saveTableId, customerName: savedName, saveCustomerName } = useSession()
@@ -77,6 +79,7 @@ export default function ScanScreen() {
 
     if (token) {
       saveTableId(parsed.tableId)
+      queryClient.removeQueries({ queryKey: ['orderDetail'] })
       router.replace('/order')
     } else {
       setScannedTableId(parsed.tableId)
@@ -93,6 +96,7 @@ export default function ScanScreen() {
       )
       await saveToken(result.data.token)
       saveCustomerName(customerName)
+      await queryClient.removeQueries({ queryKey: ['orderDetail'] })
       router.replace('/order')
     } catch (error) {
       setScanError(`No se pudo unir a la mesa: ${error instanceof Error ? error.message : 'Error desconocido'}`)

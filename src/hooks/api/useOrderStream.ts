@@ -21,6 +21,7 @@ const initialStreamState: OrderStreamState = {
 
 const MAX_RECONNECT_ATTEMPTS = 2
 const RETRY_DELAY_MS = 3000
+const CONNECTION_TIMEOUT_MS = 10000
 
 export function useOrderStream() {
   const queryClient = useQueryClient()
@@ -28,6 +29,7 @@ export function useOrderStream() {
   useEffect(() => {
     let isActive = true
     let retryTimeout: ReturnType<typeof setTimeout> | null = null
+    let connectionTimeout: ReturnType<typeof setTimeout> | null = null
     let currentController: AbortController | null = null
     let attemptCount = 0
 
@@ -45,11 +47,24 @@ export function useOrderStream() {
       const controller = new AbortController()
       currentController = controller
 
+      connectionTimeout = setTimeout(() => {
+        if (!isActive) return
+        controller.abort()
+        onErrorHandler(new Error('SSE connection timeout'))
+      }, CONNECTION_TIMEOUT_MS)
+
+      function onErrorHandler(err: Error) {
+        if (!isActive) return
+        console.error('SSE connection error:', err)
+        scheduleRetry()
+      }
+
       try {
         await subscribeOrderStream({
           signal: controller.signal,
           onOpen: () => {
             if (!isActive) return
+            if (connectionTimeout) clearTimeout(connectionTimeout)
             attemptCount = 0
             setState((prev) => ({ ...prev, isConnected: true, reconnecting: false }))
           },
@@ -193,16 +208,11 @@ export function useOrderStream() {
               }
             })
           },
-          onError: (err: Error) => {
-            if (!isActive) return
-            console.error('SSE connection error:', err)
-            scheduleRetry()
-          },
+          onError: onErrorHandler,
         })
       } catch (err) {
         console.error('SSE subscription setup failed:', err)
-        if (!isActive) return
-        scheduleRetry()
+        onErrorHandler(err instanceof Error ? err : new Error(String(err)))
       }
     }
 
@@ -211,6 +221,7 @@ export function useOrderStream() {
     return () => {
       isActive = false
       if (retryTimeout) clearTimeout(retryTimeout)
+      if (connectionTimeout) clearTimeout(connectionTimeout)
       if (currentController) currentController.abort()
       setState(initialStreamState)
     }

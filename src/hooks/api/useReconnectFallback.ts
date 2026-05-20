@@ -52,8 +52,12 @@ export function useReconnectFallback(
         }
       } catch (err) {
         if (!isActive) return
-        const isAuth = err instanceof ApiError && err.status === 401
-        setState({ checkingStatus: false, orderStatus: null, authError: isAuth })
+        if (err instanceof ApiError && err.status === 401) {
+          setState({ checkingStatus: false, orderStatus: null, authError: true })
+        } else {
+          // Network error, server down, etc → go scan QR
+          setState({ checkingStatus: false, orderStatus: 'CANCELLED', authError: false })
+        }
       }
     }
 
