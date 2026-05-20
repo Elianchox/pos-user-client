@@ -24,6 +24,15 @@ export interface JoinTableResponse {
 }
 
 
+export enum OrderItemStatusEnum {
+  PENDING = 'PENDING',
+  SENT_TO_KITCHEN = 'SENT_TO_KITCHEN',
+  PREPARING = 'PREPARING',
+  READY = 'READY',
+  SERVED = 'SERVED',
+  CANCELLED = 'CANCELLED',
+}
+
 export enum OrderStatusEnum {
   DRAFT = 'DRAFT',
   OPEN = 'OPEN',
@@ -32,12 +41,9 @@ export enum OrderStatusEnum {
   PAID = 'PAID',
   CANCELLED = 'CANCELLED',
   CLOSED = 'CLOSED',
-  SENT_TO_KITCHEN = 'SENT_TO_KITCHEN',
-  PREPARING = 'PREPARING',
-  READY = 'READY',
-  SERVED = 'SERVED',
 }
-export const ORDER_ITEM_STATUS = Object.values(OrderStatusEnum)
+
+export const ORDER_ITEM_STATUS = Object.values(OrderItemStatusEnum)
 export type OrderItemStatusType = typeof ORDER_ITEM_STATUS[number];
 export type OrderStatus = `${OrderStatusEnum}`
 
