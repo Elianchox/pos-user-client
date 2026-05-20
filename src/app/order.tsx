@@ -5,6 +5,7 @@ import { OrderTotal } from '@/components/order/OrderTotal'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
+import { LogoutButton } from '@/components/ui/LogoutButton'
 import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
 import { useOrderStream } from '@/hooks/api/useOrderStream'
@@ -66,6 +67,12 @@ const useStyles = makeStyles((t) => ({
     fontSize: 20,
     fontWeight: '700',
     color: t.foreground,
+    marginBottom: t.spacing[3],
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: t.spacing[3],
   },
 }))
@@ -188,9 +195,12 @@ export default function OrderScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.headerWrapper}>
-          <Text style={styles.tableName}>
-            {orderData?.data?.table?.name ?? (tableId ? `Mesa ${tableId}` : 'Mesa')}
-          </Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.tableName}>
+              {orderData?.data?.table?.name ?? (tableId ? `Mesa ${tableId}` : 'Mesa')}
+            </Text>
+            <LogoutButton />
+          </View>
 
           <OrderFilterBar
             activeStatuses={activeStatuses}
