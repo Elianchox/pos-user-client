@@ -1,4 +1,4 @@
-import { clearAll, getCustomerName, getTableId, getToken, setCustomerName as persistCustomerName, setTableId, setToken } from '@/services/session'
+import { clearAll, clearSessionExceptName, getCustomerName, getTableId, getToken, setCustomerName as persistCustomerName, setTableId, setToken } from '@/services/session'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 interface SessionContextType {
@@ -8,6 +8,7 @@ interface SessionContextType {
   isLoading: boolean
   saveToken: (token: string) => Promise<void>
   removeToken: () => Promise<void>
+  clearSessionExceptName: () => Promise<void>
   saveTableId: (id: string) => Promise<void>
   saveCustomerName: (name: string) => Promise<void>
 }
@@ -40,6 +41,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setTableIdState(null)
   }, [])
 
+  const clearExceptName = useCallback(async () => {
+    await clearSessionExceptName()
+    setTokenState(null)
+    setTableIdState(null)
+  }, [])
+
   const saveTableId = useCallback(async (id: string) => {
     await setTableId(id)
     setTableIdState(id)
@@ -51,7 +58,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <SessionContext.Provider value={{ token, tableId, customerName, isLoading, saveToken, removeToken, saveTableId, saveCustomerName }}>
+    <SessionContext.Provider value={{ token, tableId, customerName, isLoading, saveToken, removeToken, clearSessionExceptName: clearExceptName, saveTableId, saveCustomerName }}>
       {children}
     </SessionContext.Provider>
   )
