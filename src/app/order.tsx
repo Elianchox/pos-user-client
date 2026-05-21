@@ -8,12 +8,10 @@ import { LoadingState } from '@/components/ui/LoadingState'
 import { LogoutButton } from '@/components/ui/LogoutButton'
 import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
-import { useOrderStream } from '@/hooks/api/useOrderStream'
-import { useReconnectFallback } from '@/hooks/api/useReconnectFallback'
 import { makeStyles } from '@/theme/makeStyles'
 import { type OrderItem, type OrderItemStatusType } from '@/types/api'
 import { useRouter } from 'expo-router'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -81,11 +79,7 @@ export default function OrderScreen() {
   const router = useRouter()
   const { tableId, removeToken } = useSession()
   const { data: orderData, isLoading: orderLoading, error: orderError, refetch } = useOrderDetail()
-
-  const stream = useOrderStream()
-  const reconnectFallback = useReconnectFallback(stream.reconnectFailed, refetch)
   const styles = useStyles()
-  const hasNavigated = useRef(false)
 
   const [activeStatuses, setActiveStatuses] = useState<OrderItemStatusType[] | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -132,54 +126,8 @@ export default function OrderScreen() {
     setSearchQuery(query)
   }, [])
 
-  useEffect(() => {
-    if (stream.orderClosed || stream.sessionEnded) {
-      if (hasNavigated.current) return
-      hasNavigated.current = true
-      removeToken().then(() => {
-        router.replace('/thank-you')
-      })
-    }
-  }, [stream.orderClosed, stream.sessionEnded, removeToken, router])
-
-  useEffect(() => {
-    if (hasNavigated.current) return
-
-    if (reconnectFallback.authError) {
-      hasNavigated.current = true
-      removeToken().then(() => {
-        router.replace('/')
-      })
-      return
-    }
-
-    if (reconnectFallback.checkingStatus) {
-      return
-    }
-
-    const status = reconnectFallback.orderStatus
-    if (!status) return
-
-    if (status === 'CLOSED' || status === 'PAID') {
-      hasNavigated.current = true
-      removeToken().then(() => {
-        router.replace('/thank-you')
-      })
-    } else if (status === 'CANCELLED') {
-      hasNavigated.current = true
-      removeToken().then(() => {
-        router.replace('/')
-      })
-    }
-    // DRAFT,OPEN,IN_PROGRESS,PENDING_PAYMENT → stay on screen
-  }, [reconnectFallback.authError, reconnectFallback.checkingStatus, reconnectFallback.orderStatus, removeToken, router])
-
   if (orderLoading) {
     return <LoadingState fullScreen message="Cargando tu orden..." />
-  }
-
-  if (reconnectFallback.checkingStatus) {
-    return <LoadingState fullScreen message="Reconectando..." />
   }
 
   if (orderError) {
