@@ -1,4 +1,5 @@
 import { LoadingState } from '@/components/ui/LoadingState'
+import { WelcomeIllustration } from '@/components/ui/WelcomeIllustration'
 import { useSessionRestore } from '@/hooks/api/useSessionRestore'
 import { makeStyles } from '@/theme/makeStyles'
 import { useRouter } from 'expo-router'
@@ -18,10 +19,7 @@ const useStyles = makeStyles((t) => ({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  emoji: {
-    fontSize: 48,
-    marginBottom: t.spacing[4],
+    gap: t.spacing[12],
   },
   title: {
     fontSize: 30,
@@ -66,10 +64,10 @@ export default function WelcomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.hero}>
-          <Text style={styles.emoji}>🍽️</Text>
           <Text style={styles.title}>
             Bienvenido
           </Text>
+          <WelcomeIllustration />
           <Text style={styles.subtitle}>
             Escanea el QR de tu mesa para ver tu orden en tiempo real.
           </Text>

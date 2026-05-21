@@ -41,7 +41,7 @@ const useStyles = makeStyles((t) => ({
   },
   errorContainer: {
     marginHorizontal: t.spacing[4],
-    marginTop: t.spacing[3],
+    marginVertical: t.spacing[3],
     padding: t.spacing[3],
     borderRadius: t.radii.lg,
     borderWidth: 1,
