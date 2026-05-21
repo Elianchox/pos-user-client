@@ -1,3 +1,4 @@
+import { ThankYouIllustration } from '@/components/ui/ThankYouIllustration'
 import { makeStyles } from '@/theme/makeStyles'
 import { useRouter } from 'expo-router'
 import { Text, TouchableOpacity, View } from 'react-native'
@@ -6,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 const useStyles = makeStyles((t) => ({
   safeArea: {
     flex: 1,
+    backgroundColor: t.background,
   },
   container: {
     height: '100%',
@@ -13,23 +15,22 @@ const useStyles = makeStyles((t) => ({
     justifyContent: 'center',
     backgroundColor: t.background,
     paddingHorizontal: t.spacing[6],
+    gap: t.spacing[4],
   },
-  emoji: {
-    fontSize: 60,
-    marginBottom: t.spacing[4],
+  illustrationWrapper: {
+    width: '100%',
+    maxWidth: 280,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: t.foreground,
     textAlign: 'center',
-    marginBottom: t.spacing[2],
   },
   subtitle: {
     fontSize: 16,
     color: t.mutedForeground,
     textAlign: 'center',
-    marginBottom: t.spacing[8],
   },
   button: {
     backgroundColor: t.primary,
@@ -54,7 +55,9 @@ export default function ThankYouScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.emoji}>🙏</Text>
+        <View style={styles.illustrationWrapper}>
+          <ThankYouIllustration />
+        </View>
         <Text style={styles.title}>
           Gracias por tu visita
         </Text>

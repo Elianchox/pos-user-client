@@ -1,7 +1,7 @@
+import { makeStyles } from '@/theme/makeStyles'
 import { useCameraPermissions } from 'expo-camera'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { makeStyles } from '@/theme/makeStyles'
 
 interface CameraPermissionGateProps {
   children: React.ReactNode
