@@ -7,7 +7,9 @@ export function useOrderDetail() {
   return useQuery<OrderDetailResponse>({
     queryKey: ['orderDetail'],
     queryFn: ({ signal }) => getOrderDetail(signal),
-    staleTime: Infinity,
+    staleTime: 0,
+    refetchInterval: 8000,
+    refetchOnWindowFocus: true,
     retry: (failureCount, error) => {
       if (error instanceof ApiError && error.status === 401) {
         return false
