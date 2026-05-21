@@ -10,8 +10,6 @@ import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
 import { makeStyles } from '@/theme/makeStyles'
 import { type OrderItem, type OrderItemStatusType } from '@/types/api'
-import { useRouter } from 'expo-router'
-import { useCallback, useMemo, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -76,8 +74,7 @@ const useStyles = makeStyles((t) => ({
 }))
 
 export default function OrderScreen() {
-  const router = useRouter()
-  const { tableId, removeToken } = useSession()
+  const { tableId } = useSession()
   const { data: orderData, isLoading: orderLoading, error: orderError, refetch } = useOrderDetail()
   const styles = useStyles()
 

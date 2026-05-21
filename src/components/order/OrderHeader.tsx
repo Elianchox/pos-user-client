@@ -1,12 +1,9 @@
 import { Text, View } from 'react-native'
-import { ConnectionStatus } from './ConnectionStatus'
 import { makeStyles } from '@/theme/makeStyles'
 
 interface OrderHeaderProps {
   tableName: string
   totalAmount: string
-  isConnected: boolean
-  reconnecting?: boolean
 }
 
 const useStyles = makeStyles((t) => ({
@@ -44,14 +41,13 @@ const useStyles = makeStyles((t) => ({
   },
 }))
 
-export function OrderHeader({ tableName, totalAmount, isConnected, reconnecting }: OrderHeaderProps) {
+export function OrderHeader({ tableName, totalAmount }: OrderHeaderProps) {
   const styles = useStyles()
 
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
         <Text style={styles.tableName}>{tableName}</Text>
-        <ConnectionStatus isConnected={isConnected} reconnecting={reconnecting} />
       </View>
       <View style={styles.bottomRow}>
         <Text style={styles.totalLabel}>Total</Text>
