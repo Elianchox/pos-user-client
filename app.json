@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "pos-user-client",
+    "name": "Myorder",
     "slug": "pos-user-client",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -47,7 +47,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/logo_x96.png"
+          "icon": "./assets/images/logo_x96.png",
+          "color": "#208AEF"
         }
       ]
     ],

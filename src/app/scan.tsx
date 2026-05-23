@@ -65,6 +65,7 @@ export default function ScanScreen() {
   const [scannedTableId, setScannedTableId] = useState<string | null>(paramTableId ?? null)
   const [customerName, setCustomerName] = useState(savedName ?? '')
   const [scanError, setScanError] = useState<string | null>(null)
+  const [isJoining, setIsJoining] = useState(false)
   const styles = useStyles()
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
@@ -88,7 +89,8 @@ export default function ScanScreen() {
   }
 
   const handleJoin = async () => {
-    if (!scannedTableId) return
+    if (!scannedTableId || isJoining) return
+    setIsJoining(true)
 
     const controller = new AbortController()
     try {
@@ -106,6 +108,8 @@ export default function ScanScreen() {
       router.replace('/order')
     } catch (error) {
       setScanError(`No se pudo unir a la mesa: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+    } finally {
+      setIsJoining(false)
     }
   }
 
@@ -133,7 +137,7 @@ export default function ScanScreen() {
               customerName={customerName}
               onCustomerNameChange={setCustomerName}
               onJoin={handleJoin}
-              isPending={joinTableMutation.isPending}
+              isPending={isJoining || joinTableMutation.isPending}
               onRetryScan={() => setScannedTableId(null)}
             />
           )}
