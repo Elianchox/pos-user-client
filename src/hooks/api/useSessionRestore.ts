@@ -35,7 +35,7 @@ export function useSessionRestore() {
         clearTimeout(timeout)
 
         if (result.success && result.data) {
-          router.replace('/order')
+          // router.replace('/order')
         } else {
           await removeToken()
         }

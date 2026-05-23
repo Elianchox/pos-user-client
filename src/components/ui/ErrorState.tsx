@@ -1,6 +1,6 @@
-import { Text, TouchableOpacity, View } from 'react-native'
-import { AlertTriangle } from 'lucide-react-native'
 import { makeStyles } from '@/theme/makeStyles'
+import { AlertTriangle } from 'lucide-react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 
 interface ErrorStateProps {
   message?: string
@@ -13,6 +13,7 @@ const useStyles = makeStyles((t) => ({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: t.spacing[6],
+    backgroundColor: t.background,
   },
   title: {
     fontSize: 18,

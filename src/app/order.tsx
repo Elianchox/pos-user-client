@@ -8,9 +8,11 @@ import { LoadingState } from '@/components/ui/LoadingState'
 import { LogoutButton } from '@/components/ui/LogoutButton'
 import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
+import { ApiError } from '@/services/api/client'
 import { makeStyles } from '@/theme/makeStyles'
 import { type OrderItem, type OrderItemStatusType } from '@/types/api'
-import { useCallback, useMemo, useState } from 'react'
+import { router } from 'expo-router'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -75,8 +77,16 @@ const useStyles = makeStyles((t) => ({
 }))
 
 export default function OrderScreen() {
-  const { tableId } = useSession()
+  const { tableId, removeToken } = useSession()
   const { data: orderData, isLoading: orderLoading, error: orderError, refetch } = useOrderDetail()
+
+  useEffect(() => {
+    if (orderError instanceof ApiError && orderError.status === 401) {
+      removeToken()
+      router.replace('/')
+    }
+    }, [orderError, removeToken])
+
   const styles = useStyles()
 
   const [activeStatuses, setActiveStatuses] = useState<OrderItemStatusType[] | null>(null)

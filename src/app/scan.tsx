@@ -3,6 +3,7 @@ import { JoinTableForm } from '@/components/JoinTableForm'
 import { QrScanner } from '@/components/QrScanner'
 import { useSession } from '@/context/SessionContext'
 import { useJoinTable } from '@/hooks/api/useJoinTable'
+import { getExpoPushToken } from '@/services/notifications'
 import { makeStyles } from '@/theme/makeStyles'
 import { parseQrUrl } from '@/utils/qr'
 import { useQueryClient } from '@tanstack/react-query'
@@ -91,8 +92,13 @@ export default function ScanScreen() {
 
     const controller = new AbortController()
     try {
+      const pushToken = await getExpoPushToken()
+
       const result = await joinTableMutation.mutateAsync(
-        { body: { tableId: scannedTableId, customerName: customerName || null }, signal: controller.signal },
+        {
+          body: { tableId: scannedTableId, customerName: customerName || null, pushToken },
+          signal: controller.signal,
+        },
       )
       await saveToken(result.data.token)
       saveCustomerName(customerName)

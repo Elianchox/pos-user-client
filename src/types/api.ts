@@ -11,6 +11,7 @@ export interface MobileSession {
 export interface JoinTableRequest {
   tableId: string
   customerName?: string | null
+  pushToken?: string | null
 }
 
 export interface JoinTableResponse {

@@ -1,5 +1,5 @@
-import { ActivityIndicator, Text, View } from 'react-native'
 import { makeStyles } from '@/theme/makeStyles'
+import { ActivityIndicator, Text, View } from 'react-native'
 
 interface LoadingStateProps {
   message?: string
@@ -11,10 +11,12 @@ const useStyles = makeStyles((t) => ({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: t.background,
   },
   inline: {
     paddingVertical: t.spacing[8],
     alignItems: 'center',
+    backgroundColor: t.background,
   },
   message: {
     marginTop: t.spacing[4],

@@ -14,8 +14,10 @@ const useStyles = makeStyles((t) => ({
   container: {
     height: '100%',
     paddingHorizontal: t.spacing[6],
+    alignItems: 'center',
   },
   hero: {
+    width: '100%',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
