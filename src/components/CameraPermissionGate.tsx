@@ -1,3 +1,4 @@
+import { CameraPermissionIllustration } from '@/components/ui/CameraPermissionIllustration'
 import { makeStyles } from '@/theme/makeStyles'
 import { useCameraPermissions } from 'expo-camera'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
@@ -14,28 +15,49 @@ const useStyles = makeStyles((t) => ({
     justifyContent: 'center',
     backgroundColor: t.background,
   },
-  permissionContainer: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: t.background,
+  },
+  container: {
+    height: '100%',
+    paddingHorizontal: t.spacing[6],
+    alignItems: 'center',
+  },
+  hero: {
+    width: '100%',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: t.background,
-    paddingHorizontal: t.spacing[6],
+    gap: t.spacing[12],
   },
-  permissionText: {
-    fontSize: 18,
+  title: {
+    fontSize: 30,
+    fontWeight: '700',
     color: t.foreground,
     textAlign: 'center',
-    marginBottom: t.spacing[4],
+    marginBottom: t.spacing[2],
   },
-  permissionButton: {
+  subtitle: {
+    fontSize: 16,
+    color: t.mutedForeground,
+    textAlign: 'center',
+    marginBottom: t.spacing[8],
+  },
+  button: {
     backgroundColor: t.primary,
-    paddingHorizontal: t.spacing[6],
-    paddingVertical: t.spacing[3],
-    borderRadius: t.radii.lg,
+    paddingHorizontal: t.spacing[8],
+    marginVertical: t.spacing[4],
+    paddingVertical: t.spacing[4],
+    width: '100%',
+    maxWidth: 384,
+    borderRadius: t.radii.md,
   },
-  permissionButtonText: {
+  buttonText: {
     color: t.primaryForeground,
-    fontWeight: '500',
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '600',
   },
 }))
 
@@ -53,16 +75,22 @@ export function CameraPermissionGate({ children }: CameraPermissionGateProps) {
 
   if (!permission.granted) {
     return (
-      <SafeAreaView style={styles.permissionContainer}>
-        <Text style={styles.permissionText}>
-          Necesitamos permiso para acceder a la cámara y escanear el código QR.
-        </Text>
-        <TouchableOpacity
-          onPress={requestPermission}
-          style={styles.permissionButton}
-        >
-          <Text style={styles.permissionButtonText}>Conceder permiso</Text>
-        </TouchableOpacity>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <View style={styles.hero}>
+            <Text style={styles.title}>Permiso de cámara</Text>
+            <CameraPermissionIllustration />
+            <Text style={styles.subtitle}>
+              Necesitamos permiso para acceder a la cámara y escanear el código QR.
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={requestPermission}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>Conceder permiso</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     )
   }
