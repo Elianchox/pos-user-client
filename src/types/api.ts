@@ -12,6 +12,7 @@ export interface JoinTableRequest {
   tableId: string
   customerName?: string | null
   pushToken?: string | null
+  deviceId: string
 }
 
 export interface JoinTableResponse {

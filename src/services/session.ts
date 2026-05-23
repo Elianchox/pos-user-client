@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 const TOKEN_KEY = 'mobile_session_token'
 const TABLE_ID_KEY = 'mobile_table_id'
 const CUSTOMER_NAME_KEY = 'mobile_customer_name'
+const DEVICE_ID_KEY = 'mobile_device_id'
 
 export async function getToken(): Promise<string | null> {
   return AsyncStorage.getItem(TOKEN_KEY)
@@ -34,6 +35,14 @@ export async function getCustomerName(): Promise<string | null> {
 
 export async function setCustomerName(name: string): Promise<void> {
   await AsyncStorage.setItem(CUSTOMER_NAME_KEY, name)
+}
+
+export async function getDeviceId(): Promise<string | null> {
+  return AsyncStorage.getItem(DEVICE_ID_KEY)
+}
+
+export async function setDeviceId(id: string): Promise<void> {
+  await AsyncStorage.setItem(DEVICE_ID_KEY, id)
 }
 
 export async function clearAll(): Promise<void> {
