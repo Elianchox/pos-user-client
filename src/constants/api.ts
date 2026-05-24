@@ -6,4 +6,6 @@ export const ENDPOINTS = {
   tableStatus: (id: string) => `/tables/${id}/status`,
   orderDetail: '/orders/order-detail',
   orderItemStatuses: '/orders/order-item-statuses',
+  deviceOrders: '/orders/device-orders',
+  deviceOrderDetail: '/orders/device-order-detail',
 } as const

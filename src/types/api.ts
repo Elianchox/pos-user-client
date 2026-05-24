@@ -92,3 +92,42 @@ export interface LogoutResponse {
   success: boolean
   data: { message: string }
 }
+
+export interface DeviceOrderItem {
+  orderId: string
+  businessName: string
+  tableName: string
+  status: string
+  totalAmount: string
+  itemCount: number
+  createdAt: string
+}
+
+export interface DeviceOrderDetailItem {
+  itemId: string
+  productName: string
+  unitPrice: string
+  status: string
+  notes: string | null
+}
+
+export interface DeviceOrderDetail {
+  orderId: string
+  businessName: string
+  tableName: string
+  status: string
+  notes: string | null
+  items: DeviceOrderDetailItem[]
+  totalAmount: string
+  createdAt: string
+}
+
+export interface DeviceOrdersResponse {
+  success: boolean
+  data: DeviceOrderItem[]
+}
+
+export interface DeviceOrderDetailResponse {
+  success: boolean
+  data: DeviceOrderDetail
+}

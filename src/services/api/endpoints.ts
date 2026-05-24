@@ -1,5 +1,7 @@
 import { ENDPOINTS } from '@/constants/api';
 import type {
+  DeviceOrderDetailResponse,
+  DeviceOrdersResponse,
   JoinTableRequest,
   JoinTableResponse,
   LogoutResponse,
@@ -31,4 +33,20 @@ export function getOrderDetail(signal?: AbortSignal) {
 
 export function getOrderItemStatuses(signal?: AbortSignal) {
   return apiFetch<OrderItemStatusesResponse>(ENDPOINTS.orderItemStatuses, { method: 'GET' }, signal)
+}
+
+export function getDeviceOrders(deviceId: string, signal?: AbortSignal) {
+  return apiFetch<DeviceOrdersResponse>(
+    `${ENDPOINTS.deviceOrders}?deviceId=${encodeURIComponent(deviceId)}`,
+    { method: 'GET' },
+    signal,
+  )
+}
+
+export function getDeviceOrderDetail(id: string, signal?: AbortSignal) {
+  return apiFetch<DeviceOrderDetailResponse>(
+    `${ENDPOINTS.deviceOrderDetail}?id=${encodeURIComponent(id)}`,
+    { method: 'GET' },
+    signal,
+  )
 }

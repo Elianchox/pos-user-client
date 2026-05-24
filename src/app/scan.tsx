@@ -2,15 +2,14 @@ import { CameraPermissionGate } from '@/components/CameraPermissionGate'
 import { JoinTableForm } from '@/components/JoinTableForm'
 import { QrScanner } from '@/components/QrScanner'
 import { useSession } from '@/context/SessionContext'
+import { useDeviceId } from '@/hooks/api/useDeviceId'
 import { useJoinTable } from '@/hooks/api/useJoinTable'
 import { getExpoPushToken } from '@/services/notifications'
-import { getDeviceId, setDeviceId } from '@/services/session'
 import { makeStyles } from '@/theme/makeStyles'
 import { parseQrUrl } from '@/utils/qr'
 import { useQueryClient } from '@tanstack/react-query'
-import { randomUUID } from 'expo-crypto'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -68,20 +67,8 @@ export default function ScanScreen() {
   const [customerName, setCustomerName] = useState(savedName ?? '')
   const [scanError, setScanError] = useState<string | null>(null)
   const [isJoining, setIsJoining] = useState(false)
-  const [deviceId, setDeviceIdState] = useState<string | null>(null)
+  const deviceId = useDeviceId()
   const styles = useStyles()
-
-  useEffect(() => {
-    getDeviceId().then((id) => {
-      if (id) {
-        setDeviceIdState(id)
-      } else {
-        const newId = randomUUID()
-        setDeviceId(newId)
-        setDeviceIdState(newId)
-      }
-    })
-  }, [])
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     if (scannedTableId || joinTableMutation.isPending) return
@@ -110,9 +97,6 @@ export default function ScanScreen() {
     const controller = new AbortController()
     try {
       const pushToken = await getExpoPushToken()
-console.log('========================================>');
-console.log(deviceId);
-console.log('========================================>');
       const result = await joinTableMutation.mutateAsync(
         {
           body: { tableId: scannedTableId, customerName: customerName || null, pushToken, deviceId: deviceId! },

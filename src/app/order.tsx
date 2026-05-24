@@ -13,7 +13,7 @@ import { makeStyles } from '@/theme/makeStyles'
 import { type OrderItem, type OrderItemStatusType } from '@/types/api'
 import { router } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const SCROLL_BOTTOM_PADDING = 80
@@ -155,7 +155,12 @@ export default function OrderScreen() {
             <Text style={styles.tableName}>
               {orderData?.data?.table?.name ?? (tableId ? `Mesa ${tableId}` : 'Mesa')}
             </Text>
-            <LogoutButton />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <TouchableOpacity onPress={() => router.push('/history')}>
+                <Text style={{ color: '#3b82f6', fontSize: 14, fontWeight: '500' }}>Historial</Text>
+              </TouchableOpacity>
+              <LogoutButton />
+            </View>
           </View>
 
           <OrderFilterBar

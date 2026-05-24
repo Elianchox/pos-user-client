@@ -1,9 +1,8 @@
-import { LoadingState } from '@/components/ui/LoadingState'
 import { WelcomeIllustration } from '@/components/ui/WelcomeIllustration'
 import { useSessionRestore } from '@/hooks/api/useSessionRestore'
 import { makeStyles } from '@/theme/makeStyles'
 import { useRouter } from 'expo-router'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const useStyles = makeStyles((t) => ({
@@ -51,16 +50,16 @@ const useStyles = makeStyles((t) => ({
     fontSize: 18,
     fontWeight: '600',
   },
+  spinner: {
+    marginVertical: t.spacing[4],
+    paddingVertical: t.spacing[4],
+  },
 }))
 
 export default function WelcomeScreen() {
   const router = useRouter()
   const { isRestoring } = useSessionRestore()
   const styles = useStyles()
-
-  if (isRestoring) {
-    return <LoadingState fullScreen message="Restaurando sesión..." />
-  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -74,12 +73,24 @@ export default function WelcomeScreen() {
             Escanea el QR de tu mesa para ver tu orden en tiempo real.
           </Text>
         </View>
+        {isRestoring ? (
+          <ActivityIndicator size="large" style={styles.spinner} />
+        ) : (
+          <TouchableOpacity
+            onPress={() => router.push('/scan')}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>
+              Escanear QR
+            </Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
-          onPress={() => router.push('/scan')}
-          style={styles.button}
+          onPress={() => router.push('/history')}
+          style={{ marginTop: 16 }}
         >
-          <Text style={styles.buttonText}>
-            Escanear QR
+          <Text style={{ color: '#3b82f6', fontSize: 15, textAlign: 'center' }}>
+            Ver historial de órdenes
           </Text>
         </TouchableOpacity>
       </View>
