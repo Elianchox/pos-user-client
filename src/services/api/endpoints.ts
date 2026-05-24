@@ -35,9 +35,18 @@ export function getOrderItemStatuses(signal?: AbortSignal) {
   return apiFetch<OrderItemStatusesResponse>(ENDPOINTS.orderItemStatuses, { method: 'GET' }, signal)
 }
 
-export function getDeviceOrders(deviceId: string, signal?: AbortSignal) {
+export function getDeviceOrders(
+  deviceId: string,
+  params?: { page?: number; limit?: number; status?: string; search?: string },
+  signal?: AbortSignal,
+) {
+  const queryParams = new URLSearchParams({ deviceId: encodeURIComponent(deviceId) })
+  if (params?.page) queryParams.set('page', String(params.page))
+  if (params?.limit) queryParams.set('limit', String(params.limit))
+  if (params?.status) queryParams.set('status', params.status)
+  if (params?.search) queryParams.set('search', params.search)
   return apiFetch<DeviceOrdersResponse>(
-    `${ENDPOINTS.deviceOrders}?deviceId=${encodeURIComponent(deviceId)}`,
+    `${ENDPOINTS.deviceOrders}?${queryParams.toString()}`,
     { method: 'GET' },
     signal,
   )
