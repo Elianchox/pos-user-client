@@ -15,7 +15,7 @@ import type { DeviceOrderItem } from '@/types/api'
 const ORDER_STATUS_FILTERS = [
   { label: 'Todos', statuses: null as string[] | null },
   { label: 'Abiertas', statuses: ['OPEN', 'IN_PROGRESS', 'PENDING_PAYMENT'] },
-  { label: 'Pagadas', statuses: ['PAID', 'CLOSED'] },
+  { label: 'Pagadas', statuses: ['PAID'] },
   { label: 'Canceladas', statuses: ['CANCELLED'] },
 ]
 

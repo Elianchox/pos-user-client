@@ -42,7 +42,6 @@ export enum OrderStatusEnum {
   PENDING_PAYMENT = 'PENDING_PAYMENT',
   PAID = 'PAID',
   CANCELLED = 'CANCELLED',
-  CLOSED = 'CLOSED',
 }
 
 export const ORDER_ITEM_STATUS = Object.values(OrderItemStatusEnum)

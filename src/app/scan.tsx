@@ -70,8 +70,8 @@ export default function ScanScreen() {
   const deviceId = useDeviceId()
   const styles = useStyles()
 
-  const handleBarcodeScanned = ({ data }: { data: string }) => {
-    if (scannedTableId || joinTableMutation.isPending) return
+  const handleBarcodeScanned = async ({ data }: { data: string }) => {
+    if (scannedTableId || joinTableMutation.isPending || isJoining) return
 
     const parsed = parseQrUrl(data)
     if (!parsed) {
@@ -82,9 +82,22 @@ export default function ScanScreen() {
     setScanError(null)
 
     if (token) {
-      saveTableId(parsed.tableId)
-      queryClient.removeQueries({ queryKey: ['orderDetail'] })
-      router.replace('/order')
+      setIsJoining(true)
+      try {
+        saveTableId(parsed.tableId)
+        const pushToken = await getExpoPushToken()
+        const result = await joinTableMutation.mutateAsync({
+          body: { tableId: parsed.tableId, customerName: customerName || null, pushToken, deviceId: deviceId! },
+        })
+        await saveToken(result.data.token)
+        saveCustomerName(customerName)
+        await queryClient.removeQueries({ queryKey: ['orderDetail'] })
+        router.replace('/order')
+      } catch (error) {
+        setScanError(`No se pudo unir a la mesa: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+      } finally {
+        setIsJoining(false)
+      }
     } else {
       setScannedTableId(parsed.tableId)
     }

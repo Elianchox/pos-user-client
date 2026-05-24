@@ -93,7 +93,8 @@ export default function OrderScreen() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const allGroups = useMemo(() => {
-    const items = orderData?.data?.order?.items ?? []
+    const order = orderData?.data?.order
+    const items = (order && ['PAID', 'CANCELLED'].includes(order.status)) ? [] : (order?.items ?? [])
     return groupItems(items)
   }, [orderData])
 
