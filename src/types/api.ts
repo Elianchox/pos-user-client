@@ -102,6 +102,13 @@ export interface DeviceOrderItem {
   createdAt: string
 }
 
+export interface PaginationMeta {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
 export interface DeviceOrderDetailItem {
   itemId: string
   productName: string
@@ -124,6 +131,7 @@ export interface DeviceOrderDetail {
 export interface DeviceOrdersResponse {
   success: boolean
   data: DeviceOrderItem[]
+  pagination: PaginationMeta
 }
 
 export interface DeviceOrderDetailResponse {
