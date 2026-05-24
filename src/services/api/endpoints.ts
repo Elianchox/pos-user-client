@@ -40,7 +40,7 @@ export function getDeviceOrders(
   params?: { page?: number; limit?: number; status?: string; search?: string },
   signal?: AbortSignal,
 ) {
-  const queryParams = new URLSearchParams({ deviceId: encodeURIComponent(deviceId) })
+  const queryParams = new URLSearchParams({ deviceId })
   if (params?.page) queryParams.set('page', String(params.page))
   if (params?.limit) queryParams.set('limit', String(params.limit))
   if (params?.status) queryParams.set('status', params.status)
