@@ -153,7 +153,7 @@ export default function OrderScreen() {
                 <TouchableOpacity onPress={() => router.push('/history')}>
                   <Text style={{ color: '#3b82f6', fontSize: 14, fontWeight: '500' }}>Historial</Text>
                 </TouchableOpacity>
-                {!isPaid && <LogoutButton />}
+                {!isTerminal && <LogoutButton />}
               </View>
             </View>
           </View>
