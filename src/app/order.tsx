@@ -12,6 +12,7 @@ import { ApiError } from '@/services/api/client'
 import { makeStyles } from '@/theme/makeStyles'
 import { type OrderItemStatusType } from '@/types/api'
 import { groupItems } from '@/utils/order'
+import { ThankYouContent } from '@/components/order/ThankYouContent'
 import { router } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
@@ -77,22 +78,16 @@ export default function OrderScreen() {
     }
   }, [orderError, removeToken])
 
-  useEffect(() => {
-    const status = orderData?.data?.order?.status
-    if (status === 'PAID') {
-      router.replace('/thank-you')
-    }
-  }, [orderData])
-
   const styles = useStyles()
 
   const [activeStatuses, setActiveStatuses] = useState<OrderItemStatusType[] | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
+  const orderStatus = orderData?.data?.order?.status
+  const isTerminal = orderStatus === 'PAID' || orderStatus === 'CANCELLED'
+
   const allGroups = useMemo(() => {
-    const order = orderData?.data?.order
-    const items = (order && ['PAID', 'CANCELLED'].includes(order.status)) ? [] : (order?.items ?? [])
-    return groupItems(items)
+    return groupItems(orderData?.data?.order?.items ?? [])
   }, [orderData])
 
   const filteredGroups = useMemo(() => {
@@ -140,6 +135,30 @@ export default function OrderScreen() {
         message={`No pudimos cargar tu orden ${orderError.message}`}
         onRetry={() => refetch()}
       />
+    )
+  }
+
+  if (isTerminal) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <View style={styles.headerWrapper}>
+            <View style={styles.headerRow}>
+              <Text style={styles.tableName}>
+                {orderData?.data?.table?.name ?? (tableId ? `Mesa ${tableId}` : 'Mesa')}
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <TouchableOpacity onPress={() => router.push('/history')}>
+                  <Text style={{ color: '#3b82f6', fontSize: 14, fontWeight: '500' }}>Historial</Text>
+                </TouchableOpacity>
+                <LogoutButton />
+              </View>
+            </View>
+          </View>
+
+          <ThankYouContent status={orderStatus as 'PAID' | 'CANCELLED'} />
+        </View>
+      </SafeAreaView>
     )
   }
 
