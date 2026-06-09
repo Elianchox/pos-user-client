@@ -1,47 +1,22 @@
+import { ItemSearchInput } from '@/components/order/ItemSearchInput'
 import { OrderFilterBar } from '@/components/order/OrderFilterBar'
 import { OrderItemGroup } from '@/components/order/OrderItemGroup'
-import { OrderTotal } from '@/components/order/OrderTotal'
+import { OrderSummaryCard } from '@/components/order/OrderSummaryCard'
 import { StatusBadge } from '@/components/order/StatusBadge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { useDeviceOrderDetail } from '@/hooks/api/useDeviceOrderDetail'
 import { makeStyles } from '@/theme/makeStyles'
-import type { DeviceOrderDetailItem, OrderItem, OrderItemStatusType } from '@/types/api'
+import { OrderItemStatusEnum, type DeviceOrderDetailItem, type OrderDetailOrder, type OrderItem, type OrderItemStatusType } from '@/types/api'
+import { groupItems } from '@/utils/order'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useCallback, useMemo, useState } from 'react'
+import { ArrowLeft } from 'lucide-react-native'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { ArrowLeft } from 'lucide-react-native'
 
-interface GroupedItem {
-  productId: string
-  productName: string
-  imageUrl: string | null
-  price: string
-  count: number
-  items: OrderItem[]
-}
-
-function groupItems(items: OrderItem[]): GroupedItem[] {
-  const map = new Map<string, OrderItem[]>()
-  for (const item of items) {
-    const existing = map.get(item.productId) || []
-    existing.push(item)
-    map.set(item.productId, existing)
-  }
-
-  return Array.from(map.entries()).map(([productId, items]) => ({
-    productId,
-    productName: items[0].productName,
-    imageUrl: items[0].imageUrl,
-    price: items[0].price,
-    count: items.length,
-    items,
-  }))
-}
-
-function toOrderItem(detail: DeviceOrderDetailItem, idx: number): OrderItem {
+function toOrderItem(detail: DeviceOrderDetailItem): OrderItem {
   return {
     itemId: detail.itemId,
     productId: detail.itemId,
@@ -49,6 +24,9 @@ function toOrderItem(detail: DeviceOrderDetailItem, idx: number): OrderItem {
     price: detail.unitPrice,
     imageUrl: null,
     status: detail.status,
+    notes: detail.notes,
+    taxes: detail.taxes,
+    unitPrice: detail.unitPrice,
   }
 }
 
@@ -134,21 +112,37 @@ export default function HistoryDetailScreen() {
 
   const styles = useStyles()
   const [activeStatuses, setActiveStatuses] = useState<OrderItemStatusType[] | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const HISTORY_ALLOWED_STATUSES: OrderItemStatusType[] = [OrderItemStatusEnum.SERVED, OrderItemStatusEnum.CANCELLED]
 
   const allItems = useMemo(() => {
     return (detail?.items ?? []).map(toOrderItem)
   }, [detail])
+
+  const summaryOrder = useMemo(() => {
+    if (!detail) return null
+    return { ...detail, items: allItems } as OrderDetailOrder
+  }, [detail, allItems])
 
   const allGroups = useMemo(() => {
     return groupItems(allItems)
   }, [allItems])
 
   const filteredGroups = useMemo(() => {
-    if (activeStatuses === null) return allGroups
-    return allGroups.filter((group) =>
-      group.items.some((item) => activeStatuses.includes(item.status as OrderItemStatusType)),
-    )
-  }, [allGroups, activeStatuses])
+    let groups = allGroups
+    if (activeStatuses !== null) {
+      groups = groups.filter((group) =>
+        group.items.some((item) => activeStatuses.includes(item.status as OrderItemStatusType)),
+      )
+    }
+    if (searchQuery !== '') {
+      groups = groups.filter((group) =>
+        group.productName.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    }
+    return groups
+  }, [allGroups, activeStatuses, searchQuery])
 
   const handleToggleStatus = useCallback((status: OrderItemStatusType) => {
     setActiveStatuses((prev) => {
@@ -163,6 +157,10 @@ export default function HistoryDetailScreen() {
 
   const handleClearFilters = useCallback(() => {
     setActiveStatuses(null)
+  }, [])
+
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query)
   }, [])
 
   const date = detail ? new Date(detail.createdAt) : null
@@ -234,7 +232,10 @@ export default function HistoryDetailScreen() {
             activeStatuses={activeStatuses}
             onToggle={handleToggleStatus}
             onClearAll={handleClearFilters}
+            allowedStatuses={HISTORY_ALLOWED_STATUSES}
           />
+
+          <ItemSearchInput onChange={handleSearch} />
 
           {filteredGroups.length === 0 ? (
             <EmptyState
@@ -260,7 +261,7 @@ export default function HistoryDetailScreen() {
           )}
         </ScrollView>
 
-        <OrderTotal total={detail.totalAmount} />
+        <OrderSummaryCard order={summaryOrder} />
       </View>
     </SafeAreaView>
   )

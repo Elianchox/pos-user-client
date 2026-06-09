@@ -1,7 +1,7 @@
 import { ItemSearchInput } from '@/components/order/ItemSearchInput'
 import { OrderFilterBar } from '@/components/order/OrderFilterBar'
 import { OrderItemGroup } from '@/components/order/OrderItemGroup'
-import { OrderTotal } from '@/components/order/OrderTotal'
+import { OrderSummaryCard } from '@/components/order/OrderSummaryCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
@@ -10,40 +10,14 @@ import { useSession } from '@/context/SessionContext'
 import { useOrderDetail } from '@/hooks/api/useOrderDetail'
 import { ApiError } from '@/services/api/client'
 import { makeStyles } from '@/theme/makeStyles'
-import { type OrderItem, type OrderItemStatusType } from '@/types/api'
+import { type OrderItemStatusType } from '@/types/api'
+import { groupItems } from '@/utils/order'
 import { router } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const SCROLL_BOTTOM_PADDING = 80
-
-interface GroupedItem {
-  productId: string
-  productName: string
-  imageUrl: string | null
-  price: string
-  count: number
-  items: OrderItem[]
-}
-
-function groupItems(items: OrderItem[]): GroupedItem[] {
-  const map = new Map<string, OrderItem[]>()
-  for (const item of items) {
-    const existing = map.get(item.productId) || []
-    existing.push(item)
-    map.set(item.productId, existing)
-  }
-
-  return Array.from(map.entries()).map(([productId, items]) => ({
-    productId,
-    productName: items[0].productName,
-    imageUrl: items[0].imageUrl,
-    price: items[0].price,
-    count: items.length,
-    items,
-  }))
-}
 
 const useStyles = makeStyles((t) => ({
   safeArea: {
@@ -73,6 +47,22 @@ const useStyles = makeStyles((t) => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: t.spacing[3],
+  },
+  notesContainer: {
+    backgroundColor: t.muted,
+    borderRadius: t.radii.md,
+    padding: t.spacing[3],
+    marginBottom: t.spacing[3],
+  },
+  notesLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: t.mutedForeground,
+    marginBottom: t.spacing[1],
+  },
+  notesText: {
+    fontSize: 14,
+    color: t.foreground,
   },
 }))
 
@@ -111,8 +101,6 @@ export default function OrderScreen() {
       return matchesStatus && matchesSearch
     })
   }, [allGroups, activeStatuses, searchQuery])
-
-  const totalAmount = orderData?.data?.order?.totalAmount ?? '0.00'
 
   const handleToggleStatus = useCallback((status: OrderItemStatusType) => {
     setActiveStatuses((prev) => {
@@ -164,6 +152,13 @@ export default function OrderScreen() {
             </View>
           </View>
 
+          {orderData?.data?.order?.notes && (
+            <View style={styles.notesContainer}>
+              <Text style={styles.notesLabel}>Notas</Text>
+              <Text style={styles.notesText}>{orderData.data.order.notes}</Text>
+            </View>
+          )}
+
           <OrderFilterBar
             activeStatuses={activeStatuses}
             onToggle={handleToggleStatus}
@@ -201,7 +196,7 @@ export default function OrderScreen() {
           )}
         </ScrollView>
 
-        <OrderTotal total={totalAmount} />
+        <OrderSummaryCard order={orderData?.data?.order ?? null} />
       </View>
     </SafeAreaView>
   )

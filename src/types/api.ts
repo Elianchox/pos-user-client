@@ -8,6 +8,56 @@ export interface MobileSession {
   isActive: boolean
 }
 
+export interface OrderItemTax {
+  name: string
+  percentage: number
+  amount: string
+}
+
+export type InvoiceStatus = 'DRAFT' | 'PENDING' | 'PAID'
+
+export interface InvoiceData {
+  id: string
+  status: InvoiceStatus
+  subtotal: string
+  taxAmount: string | null
+  totalAmount: string
+  fiscalNumber: string | null
+  createdAt: string
+}
+
+export type PaymentMethod =
+  | 'CASH'
+  | 'CREDIT_CARD'
+  | 'DEBIT_CARD'
+  | 'TRANSFER'
+  | 'QR_CODE'
+  | 'GIFT_CARD'
+  | 'CHECK'
+  | 'OTHER'
+
+export type PaymentStatus =
+  | 'PENDING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'REFUNDED'
+  | 'PARTIALLY_REFUNDED'
+
+export interface PaymentData {
+  id: string
+  method: PaymentMethod
+  amount: string
+  status: PaymentStatus
+  processedAt: string | null
+  createdAt: string
+}
+
+export interface TaxBreakdownItem {
+  name: string
+  percentage: number
+  amount: string
+}
+
 export interface JoinTableRequest {
   tableId: string
   customerName?: string | null
@@ -61,15 +111,25 @@ export interface OrderItem {
   productId: string
   productName: string
   price: string
+  unitPrice: string
   imageUrl: string | null
   status: OrderItemStatusType
+  notes: string | null
+  taxes: OrderItemTax[]
 }
 
 export interface OrderDetailOrder {
   orderId: string
   status: OrderStatus
+  notes: string | null
   items: OrderItem[]
   totalAmount: string
+  invoice: InvoiceData | null
+  payments: PaymentData[]
+  taxBreakdown: TaxBreakdownItem[]
+  alreadyPaid: string
+  remaining: string
+  createdAt: string
 }
 
 export interface OrderDetailResponse {
@@ -97,6 +157,7 @@ export interface DeviceOrderItem {
   businessName: string
   tableName: string
   status: string
+  invoiceStatus: string | null
   totalAmount: string
   itemCount: number
   createdAt: string
@@ -113,8 +174,9 @@ export interface DeviceOrderDetailItem {
   itemId: string
   productName: string
   unitPrice: string
-  status: string
+  status: OrderItemStatusType
   notes: string | null
+  taxes: OrderItemTax[]
 }
 
 export interface DeviceOrderDetail {
@@ -125,6 +187,11 @@ export interface DeviceOrderDetail {
   notes: string | null
   items: DeviceOrderDetailItem[]
   totalAmount: string
+  invoice: InvoiceData | null
+  payments: PaymentData[]
+  taxBreakdown: TaxBreakdownItem[]
+  alreadyPaid: string
+  remaining: string
   createdAt: string
 }
 

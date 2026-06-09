@@ -9,6 +9,7 @@ interface OrderFilterBarProps {
   activeStatuses: OrderItemStatusType[] | null
   onToggle: (status: OrderItemStatusType) => void
   onClearAll: () => void
+  allowedStatuses?: OrderItemStatusType[]
 }
 
 const useStyles = makeStyles((t) => ({
@@ -44,9 +45,10 @@ const useStyles = makeStyles((t) => ({
   },
 }))
 
-export const OrderFilterBar = memo(function OrderFilterBar({ activeStatuses, onToggle, onClearAll }: OrderFilterBarProps) {
+export const OrderFilterBar = memo(function OrderFilterBar({ activeStatuses, onToggle, onClearAll, allowedStatuses }: OrderFilterBarProps) {
   const styles = useStyles()
   const hasActiveFilters = activeStatuses !== null && activeStatuses.length > 0
+  const statuses = allowedStatuses ?? ORDER_ITEM_STATUS
 
   return (
     <View style={styles.container}>
@@ -76,7 +78,7 @@ export const OrderFilterBar = memo(function OrderFilterBar({ activeStatuses, onT
             </Text>
           </Pressable>
 
-          {ORDER_ITEM_STATUS.map((status) => {
+          {statuses.map((status) => {
             const isActive = hasActiveFilters && activeStatuses.includes(status)
             const colors = ORDER_ITEM_STATUS_COLORS[status]
 
