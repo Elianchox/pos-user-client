@@ -3,7 +3,7 @@ import { makeStyles } from '@/theme/makeStyles'
 import type { OrderDetailOrder } from '@/types/api'
 import { ChevronDown, ChevronUp, Receipt } from 'lucide-react-native'
 import { useState } from 'react'
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { InvoiceModal } from './InvoiceModal'
 
 interface OrderSummaryCardProps {
@@ -49,6 +49,9 @@ const useStyles = makeStyles((t) => ({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
   detailCard: {
     backgroundColor: t.card,
     borderTopLeftRadius: t.radii.xl,
@@ -68,8 +71,8 @@ const useStyles = makeStyles((t) => ({
     fontWeight: '700',
     color: t.foreground,
   },
-  detailScroll: {
-    paddingBottom: t.spacing[6],
+  paymentsScroll: {
+    maxHeight: 250,
   },
   lineRow: {
     flexDirection: 'row',
@@ -128,14 +131,14 @@ const useStyles = makeStyles((t) => ({
   actionRow: {
     flexDirection: 'row',
     gap: t.spacing[2],
-    marginTop: t.spacing[3],
+    marginVertical: t.spacing[8],
   },
   actionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: t.spacing[1.5],
+    gap: t.spacing[2],
     paddingVertical: t.spacing[3],
     borderRadius: t.radii.lg,
     borderWidth: 1,
@@ -203,8 +206,9 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
 
       {/* Detail bottom-sheet modal */}
       <Modal visible={showDetail} transparent animationType="slide" onRequestClose={() => setShowDetail(false)}>
-        <Pressable style={styles.overlay} onPress={() => setShowDetail(false)}>
-          <Pressable style={styles.detailCard} onPress={(e) => e.stopPropagation()}>
+        <View style={styles.overlay}>
+          <Pressable style={styles.backdrop} onPress={() => setShowDetail(false)} />
+          <View style={styles.detailCard}>
             <View style={styles.detailHeader}>
               <Text style={styles.detailTitle}>Detalle de cuenta</Text>
               <Pressable onPress={() => setShowDetail(false)}>
@@ -212,47 +216,47 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
               </Pressable>
             </View>
 
-            <ScrollView style={styles.detailScroll}>
-              <View style={styles.lineRow}>
-                <Text style={styles.lineLabel}>Subtotal</Text>
-                <Text style={styles.lineValue}>
-                  ${order.items.reduce((sum, item) => sum + parseFloat(item.price || '0'), 0).toFixed(2)}
-                </Text>
-              </View>
+            <View style={styles.lineRow}>
+              <Text style={styles.lineLabel}>Subtotal</Text>
+              <Text style={styles.lineValue}>
+                ${order.items.reduce((sum, item) => sum + parseFloat(item.price || '0'), 0).toFixed(2)}
+              </Text>
+            </View>
 
-              {order.taxBreakdown?.map((tax) => (
-                <View key={tax.name} style={styles.lineRow}>
-                  <Text style={styles.lineLabel}>{tax.name} ({tax.percentage}%)</Text>
-                  <Text style={styles.lineValue}>${tax.amount}</Text>
+            {order.taxBreakdown?.map((tax) => (
+              <View key={tax.name} style={styles.lineRow}>
+                <Text style={styles.lineLabel}>{tax.name} ({tax.percentage}%)</Text>
+                <Text style={styles.lineValue}>${tax.amount}</Text>
+              </View>
+            ))}
+
+            <View style={styles.separator} />
+
+            <View style={styles.lineRow}>
+              <Text style={[styles.lineLabel, { fontWeight: '700' }]}>Total</Text>
+              <Text style={[styles.lineValue, { fontSize: 18, fontWeight: '700' }]}>${total}</Text>
+            </View>
+
+            {alreadyPaid && parseFloat(alreadyPaid) > 0 && (
+              <>
+                <View style={styles.separator} />
+                <View style={styles.lineRow}>
+                  <Text style={[styles.lineLabel, { color: '#22c55e' }]}>Pagado</Text>
+                  <Text style={[styles.lineValue, { color: '#22c55e' }]}>${parseFloat(alreadyPaid).toFixed(2)}</Text>
                 </View>
-              ))}
+                <View style={styles.lineRow}>
+                  <Text style={[styles.lineLabel, { color: '#d97706' }]}>Restante</Text>
+                  <Text style={[styles.lineValue, { color: '#d97706', fontWeight: '700' }]}>
+                    ${parseFloat(remaining!).toFixed(2)}
+                  </Text>
+                </View>
+              </>
+            )}
 
-              <View style={styles.separator} />
-
-              <View style={styles.lineRow}>
-                <Text style={[styles.lineLabel, { fontWeight: '700' }]}>Total</Text>
-                <Text style={[styles.lineValue, { fontSize: 18, fontWeight: '700' }]}>${total}</Text>
-              </View>
-
-              {alreadyPaid && parseFloat(alreadyPaid) > 0 && (
-                <>
-                  <View style={styles.separator} />
-                  <View style={styles.lineRow}>
-                    <Text style={[styles.lineLabel, { color: '#22c55e' }]}>Pagado</Text>
-                    <Text style={[styles.lineValue, { color: '#22c55e' }]}>${parseFloat(alreadyPaid).toFixed(2)}</Text>
-                  </View>
-                  <View style={styles.lineRow}>
-                    <Text style={[styles.lineLabel, { color: '#d97706' }]}>Restante</Text>
-                    <Text style={[styles.lineValue, { color: '#d97706', fontWeight: '700' }]}>
-                      ${parseFloat(remaining!).toFixed(2)}
-                    </Text>
-                  </View>
-                </>
-              )}
-
-              {hasPayments && (
-                <>
-                  <Text style={styles.sectionTitle}>Pagos</Text>
+            {hasPayments && (
+              <>
+                <Text style={styles.sectionTitle}>Pagos</Text>
+                <ScrollView style={styles.paymentsScroll}>
                   {order.payments!.map((payment) => (
                     <View key={payment.id} style={styles.paymentRow}>
                       <View style={styles.paymentInfo}>
@@ -273,23 +277,23 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
                       <Text style={styles.paymentAmount}>${parseFloat(payment.amount).toFixed(2)}</Text>
                     </View>
                   ))}
-                </>
-              )}
+                </ScrollView>
+              </>
+            )}
 
-              <View style={styles.actionRow}>
-                {hasInvoice && (
-                  <Pressable
-                    style={styles.actionButton}
-                    onPress={() => { setShowInvoice(true); setShowDetail(false) }}
-                  >
-                    <Receipt size={16} color={styles.actionButtonText.color} />
-                    <Text style={styles.actionButtonText}>Ver Factura</Text>
-                  </Pressable>
-                )}
-              </View>
-            </ScrollView>
-          </Pressable>
-        </Pressable>
+            <View style={styles.actionRow}>
+              {hasInvoice && (
+                <Pressable
+                  style={styles.actionButton}
+                  onPress={() => { setShowInvoice(true); setShowDetail(false) }}
+                >
+                  <Receipt size={16} color={styles.actionButtonText.color} />
+                  <Text style={styles.actionButtonText}>Ver Factura</Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        </View>
       </Modal>
 
       <InvoiceModal
