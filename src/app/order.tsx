@@ -84,7 +84,9 @@ export default function OrderScreen() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const orderStatus = orderData?.data?.order?.status
-  const isTerminal = orderStatus === 'PAID' || orderStatus === 'CANCELLED'
+  const isPaid = orderStatus === 'PAID'
+  const isTerminal = isPaid || orderStatus === 'CANCELLED'
+  const showSummary = orderStatus && ['OPEN', 'IN_PROGRESS', 'PENDING_PAYMENT', 'PAID'].includes(orderStatus)
 
   const allGroups = useMemo(() => {
     return groupItems(orderData?.data?.order?.items ?? [])
@@ -158,6 +160,8 @@ export default function OrderScreen() {
 
           <ThankYouContent status={orderStatus as 'PAID' | 'CANCELLED'} />
         </View>
+
+        {showSummary && <OrderSummaryCard order={orderData?.data?.order ?? null} />}
       </SafeAreaView>
     )
   }
@@ -222,7 +226,7 @@ export default function OrderScreen() {
           )}
         </ScrollView>
 
-        <OrderSummaryCard order={orderData?.data?.order ?? null} />
+        {showSummary && <OrderSummaryCard order={orderData?.data?.order ?? null} />}
       </View>
     </SafeAreaView>
   )
