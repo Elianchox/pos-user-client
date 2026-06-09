@@ -28,7 +28,9 @@ export function getTableStatus(tableId: string, signal?: AbortSignal) {
 }
 
 export function getOrderDetail(signal?: AbortSignal) {
-  return apiFetch<OrderDetailResponse>(ENDPOINTS.orderDetail, { method: 'GET' }, signal)
+  const response = apiFetch<OrderDetailResponse>(ENDPOINTS.orderDetail, { method: 'GET' }, signal)
+  response.then((data) => console.log('[getOrderDetail] response:', JSON.stringify(data, null, 2)))
+  return response
 }
 
 export function getOrderItemStatuses(signal?: AbortSignal) {

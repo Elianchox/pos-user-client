@@ -75,7 +75,14 @@ export default function OrderScreen() {
       removeToken()
       router.replace('/')
     }
-    }, [orderError, removeToken])
+  }, [orderError, removeToken])
+
+  useEffect(() => {
+    const status = orderData?.data?.order?.status
+    if (status === 'PAID') {
+      router.replace('/thank-you')
+    }
+  }, [orderData])
 
   const styles = useStyles()
 
