@@ -45,3 +45,6 @@ app-example
 .env
 
 *firebase-adminsdk*.json
+
+# graphify knowledge graph (local cache, regenerable)
+/graphify-out/
