@@ -6,6 +6,7 @@ export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   QR_CODE: 'Código QR',
   GIFT_CARD: 'Tarjeta de Regalo',
   CHECK: 'Cheque',
+  WOMPI: 'Wompi (Nequi/PSE/Tarjeta)',
   OTHER: 'Otro',
 }
 

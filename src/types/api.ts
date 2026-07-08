@@ -34,6 +34,7 @@ export type PaymentMethod =
   | 'QR_CODE'
   | 'GIFT_CARD'
   | 'CHECK'
+  | 'WOMPI'
   | 'OTHER'
 
 export type PaymentStatus =
@@ -50,6 +51,15 @@ export interface PaymentData {
   status: PaymentStatus
   processedAt: string | null
   createdAt: string
+}
+
+export interface CheckoutLink {
+  id: string
+  amount: number
+  reference: string
+  /** @deprecated Construir URL manualmente con POS_BASE_URL + invoiceId + reference */
+  checkoutUrl: string
+  expiresAt: string
 }
 
 export interface TaxBreakdownItem {
@@ -129,6 +139,7 @@ export interface OrderDetailOrder {
   taxBreakdown: TaxBreakdownItem[]
   alreadyPaid: string
   remaining: string
+  checkoutLinks?: CheckoutLink[]
   createdAt: string
 }
 
@@ -192,6 +203,7 @@ export interface DeviceOrderDetail {
   taxBreakdown: TaxBreakdownItem[]
   alreadyPaid: string
   remaining: string
+  checkoutLinks?: CheckoutLink[]
   createdAt: string
 }
 

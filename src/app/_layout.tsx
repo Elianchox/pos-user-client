@@ -2,12 +2,13 @@ import { SessionProvider, useSession } from '@/context/SessionContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { useDeepLink } from '@/hooks/useDeepLink'
 import { setupForegroundNotificationHandler } from '@/services/notifications'
-import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, focusManager, useQueryClient } from '@tanstack/react-query'
 import * as Notifications from 'expo-notifications'
+import * as WebBrowser from 'expo-web-browser'
 import { Stack, useRouter } from 'expo-router'
 import { useEffect, useRef } from 'react'
 import type { AppStateStatus } from 'react-native'
-import { AppState, Platform } from 'react-native'
+import { Alert, AppState, Linking, Platform } from 'react-native'
 
 const queryClient = new QueryClient()
 
@@ -33,21 +34,75 @@ function DeepLinkHandler() {
 
 function NotificationHandler() {
   const router = useRouter()
-  const { token } = useSession() 
+  const { token } = useSession()
+  const queryClient = useQueryClient()
   const responseListenerRef = useRef<Notifications.EventSubscription>(null)
 
   useEffect(() => {
     setupForegroundNotificationHandler()
 
     responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        router.replace('/order')
+      async (response) => {
+        const data = response.notification.request.content.data
+
+        if (data?.checkoutUrl && typeof data.checkoutUrl === 'string') {
+          Alert.alert(
+            'Pago online',
+            '¿Cómo quieres abrir el enlace de pago?',
+            [
+              {
+                text: 'En esta app',
+                onPress: async () => {
+                  const result = await WebBrowser.openAuthSessionAsync(data.checkoutUrl)
+                  if (result.type === 'success') {
+                    queryClient.invalidateQueries({ queryKey: ['orderDetail'] })
+                  }
+                },
+              },
+              {
+                text: 'Navegador externo',
+                onPress: () => {
+                  Linking.openURL(data.checkoutUrl)
+                },
+              },
+              { text: 'Cancelar', style: 'cancel' },
+            ],
+          )
+        } else {
+          router.replace('/order')
+        }
       },
     )
 
-    const response = Notifications.getLastNotificationResponse()
-    if (response != null && token) {
-      router.replace('/order')
+    const lastResponse = Notifications.getLastNotificationResponse()
+    if (lastResponse != null && token) {
+      const data = lastResponse.notification.request.content.data
+      if (data?.checkoutUrl && typeof data.checkoutUrl === 'string') {
+        Alert.alert(
+          'Pago online',
+          '¿Cómo quieres abrir el enlace de pago?',
+          [
+            {
+              text: 'En esta app',
+              onPress: async () => {
+                const result = await WebBrowser.openAuthSessionAsync(data.checkoutUrl)
+                if (result.type === 'success') {
+                  queryClient.invalidateQueries({ queryKey: ['orderDetail'] })
+                }
+              },
+            },
+            {
+              text: 'Navegador externo',
+              onPress: () => {
+                Linking.openURL(data.checkoutUrl)
+              },
+            },
+            { text: 'Cancelar', style: 'cancel' },
+          ],
+        )
+      } else {
+        router.replace('/order')
+      }
     }
 
     return () => {
@@ -55,7 +110,7 @@ function NotificationHandler() {
         responseListenerRef.current.remove()
       }
     }
-  }, [router, token])
+  }, [queryClient, router, token])
 
   return null
 }

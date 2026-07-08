@@ -1,9 +1,12 @@
+import { POS_BASE_URL } from '@/constants/api'
 import { PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS } from '@/constants/payment'
 import { makeStyles } from '@/theme/makeStyles'
 import type { OrderDetailOrder } from '@/types/api'
 import { ChevronDown, ChevronUp, Receipt } from 'lucide-react-native'
+import { useQueryClient } from '@tanstack/react-query'
+import * as WebBrowser from 'expo-web-browser'
 import { useState } from 'react'
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { InvoiceModal } from './InvoiceModal'
 
 interface OrderSummaryCardProps {
@@ -155,6 +158,53 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
   const styles = useStyles()
   const [showDetail, setShowDetail] = useState(false)
   const [showInvoice, setShowInvoice] = useState(false)
+  const queryClient = useQueryClient()
+
+  function openPayUrl(reference: string) {
+    if (!order.invoice) return
+    const payUrl = `${POS_BASE_URL}/pay/${order.invoice.id}?ref=${reference}`
+    Alert.alert(
+      'Abrir pago',
+      '¿Cómo quieres abrir el enlace de pago?',
+      [
+        {
+          text: 'En esta app',
+          onPress: async () => {
+            const result = await WebBrowser.openAuthSessionAsync(payUrl)
+            if (result.type === 'success') {
+              queryClient.invalidateQueries({ queryKey: ['orderDetail'] })
+            }
+          },
+        },
+        {
+          text: 'Navegador externo',
+          onPress: () => {
+            Linking.openURL(payUrl)
+          },
+        },
+        { text: 'Cancelar', style: 'cancel' },
+      ],
+    )
+  }
+
+  function handlePayWithWompi() {
+    if (links.length === 1) {
+      openPayUrl(links[0].reference)
+      return
+    }
+
+    Alert.alert(
+      'Selecciona monto',
+      '¿Cuánto deseas pagar?',
+      [
+        ...links.map((link) => ({
+          text: `$${link.amount.toFixed(2)}`,
+          onPress: () => openPayUrl(link.reference),
+        })),
+        { text: 'Cancelar', style: 'cancel' as const },
+      ],
+    )
+  }
 
   if (!order) return null
 
@@ -176,6 +226,8 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
   const remaining = order.remaining
   const hasPayments = (order.payments?.length ?? 0) > 0
   const hasInvoice = !!order.invoice
+  const hasCheckoutLinks = (order.checkoutLinks?.length ?? 0) > 0
+  const links = order.checkoutLinks ?? []
 
   return (
     <>
@@ -289,6 +341,19 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
                 >
                   <Receipt size={16} color={styles.actionButtonText.color} />
                   <Text style={styles.actionButtonText}>Ver Factura</Text>
+                </Pressable>
+              )}
+              {order.status === 'PENDING_PAYMENT'
+                && parseFloat(order.remaining) > 0
+                && hasCheckoutLinks
+                && order.invoice && (
+                <Pressable
+                  style={[styles.actionButton, { backgroundColor: '#00A650', borderColor: '#00A650' }]}
+                  onPress={handlePayWithWompi}
+                >
+                  <Text style={[styles.actionButtonText, { color: '#fff' }]}>
+                    Pagar con Wompi
+                  </Text>
                 </Pressable>
               )}
             </View>

@@ -14,7 +14,6 @@ export function useDeviceOrders(
         { ...filters, page: 1, limit: 50 },
         signal,
       )
-      console.log('[useDeviceOrders] API response:', JSON.stringify(response, null, 2))
       return response
     },
     enabled: !!deviceId,
