@@ -43,6 +43,7 @@ app-example
 /android
 
 .env
+!.env.example
 
 *firebase-adminsdk*.json
 

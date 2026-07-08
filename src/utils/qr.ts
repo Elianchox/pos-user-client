@@ -1,5 +1,6 @@
+import { QR_ALLOWED_HOSTS } from '@/constants/api'
+
 const DEEPLINK_PATH = '/deeplink/table/'
-const ALLOWED_HOSTS = ['pos.eliancho.dev', '192.168.1.17:3000', 'w5kxrh8j-3000.use.devtunnels.ms']
 
 export interface ParsedQrUrl {
   tableId: string
@@ -9,7 +10,7 @@ export function parseQrUrl(url: string): ParsedQrUrl | null {
   try {
     const parsed = new URL(url)
 
-    if (!ALLOWED_HOSTS.includes(parsed.host)) {
+    if (!QR_ALLOWED_HOSTS.includes(parsed.host)) {
       return null
     }
 
